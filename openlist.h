@@ -17,19 +17,24 @@ public:
         return open_size;
     }
 
-    inline Node *get() {
-        Node *best = elements[0].front();
+    inline Node get() {
+        Node best;
+        std::vector<double> key;
+        key.resize(2, std::numeric_limits<double>::infinity());
+        std::cout << "key " << key[0] << std::endl;
         int coord = 0;
         for (size_t i = 0; i < elements.size(); i++) {
-            if (!elements[i].empty() && elements[i].front()->key[0] <= best->key[0]) {
-                if (elements[i].front()->key[0] == best->key[0]) {
-                    if(elements[i].front()->key[1] >= best->key[1]) {
+            if (!elements[i].empty()) {
+                if (elements[i].front().key[0] <= key[0]) {
+                    if (elements[i].front().key[0] == key[0]) {
+                        if(elements[i].front().key[1] >= key[1]) {
+                            best = elements[i].front();
+                            coord = i;
+                        }
+                    } else {
                         best = elements[i].front();
                         coord = i;
                     }
-                } else {
-                    best = elements[i].front();
-                    coord = i;
                 }
             }
         }
@@ -38,66 +43,72 @@ public:
         return best;
     }
     inline std::vector<double> top_key() {
-        std::vector<double> best_key(2);
-        best_key[0] = std::numeric_limits<double>::max();
+        std::vector<double> best_key;
+        best_key.resize(2, std::numeric_limits<double>::infinity());
 
         for (size_t i = 0; i < elements.size(); i++) {
 
-            if (!elements[i].empty() && elements[i].front()->key[0] <= best_key[0]) {
-                std::cout << "now\n";
-                if(elements[i].front()->key[1] >= best_key[1]) {
-                    best_key = elements[i].front()->key;
+            if (!elements[i].empty()) {
+                if (elements[i].front().key[0] <= best_key[0]) {
+                    if(elements[i].front().key[1] >= best_key[1]) {
+                        best_key = elements[i].front().key;
+                    } else {
+                        best_key = elements[i].front().key;
+                    }
                 }
-            } else {
-                best_key = elements[i].front()->key;
             }
         }
         std::cout << best_key[0] << best_key[1] << std::endl;
         return best_key;
     }
 
-    inline void put (Node *item) {
+    inline void put (Node item) {
         bool exist = false;
-        std::list<Node *>::iterator it = elements[item->point.x].begin();
-        std::list<Node *>::iterator position = elements[item->point.x].end();
-        if (elements[item->point.x].size() == 0) {
-            elements[item->point.x].emplace_back(item);
+        std::list<Node>::iterator it = elements[item.point.x].begin();
+        std::list<Node>::iterator position = elements[item.point.x].end();
+        if (elements[item.point.x].size() == 0) {
+            elements[item.point.x].emplace_back(item);
             ++open_size;
             return;
         }
-        while (it != elements[item->point.x].end()) {
-            if ((*it)->point == item->point) {
+        while (it != elements[item.point.x].end()) {
+            if (it->point == item.point) {
                 exist = true;
-                if ((*it)->key[0] > item->key[0]) {
-                    (*it)->key[0] = item->key[0];
-                    (*it)->key[1] = item->key[1];
-                    (*it)->parent = item->parent;
+                if (it->key[0] > item.key[0]) {
+                    it->key[0] = item.key[0];
+                    it->key[1] = item.key[1];
+                    it->parent = item.parent;
                 }
-                else if ((*it)->key[0] == item->key[0] && (*it)->key[1] >= item->key[1]) {
-                    (*it)->key[1] = item->key[1];
-                    (*it)->parent = item->parent;
+                else if (it->key[0] == item.key[0] && it->key[1] >= item.key[1]) {
+                    it->key[1] = item.key[1];
+                    it->parent = item.parent;
                 }
                 break;
             }
-            if ((*it)->key[0] < item->key[0]) {
+            if (it->key[0] < item.key[0]) {
                 position = it;
-            } else if((*it)->key[0] == item->key[0] && (*it)->key[1] < item->key[1]) {
+            } else if(it->key[0] == item.key[0] && it->key[1] < item.key[1]) {
                 position = it;
             }
             ++it;
         }
         if(!exist) {
-            if (++position != elements[item->point.x].end()) elements[item->point.x].emplace(position, item);
-            else elements[item->point.x].emplace_back(item);
+            if (++position != elements[item.point.x].end()) elements[item.point.x].emplace(position, item);
+            else elements[item.point.x].emplace_back(item);
             ++open_size;
         }
     }
 
-    inline void remove_if (Node *item) {
-        std::list<Node *>::iterator it = elements[item->point.x].begin();
-        while (it != elements[item->point.x].end()) {
-            if ((*it)->point == item->point) {
-                elements[item->point.x].erase(it);
+    inline void remove_if(Node item) {
+        std::cout << "kf\n";
+        if (!elements[item.point.x].empty()) {
+            auto it = elements[item.point.x].begin();
+            while (it != elements[item.point.x].end()) {
+                //std::cout << it->point << std::endl;
+                if (it->point == item.point) {
+                    elements[item.point.x].erase(it);
+                }
+                ++it;
             }
         }
     }
@@ -106,8 +117,8 @@ public:
         elements.resize(value);
     }
 
-    std::vector<Node*> get_elements() const {
-        std::vector<Node*> result;
+    std::vector<Node> get_elements() const {
+        std::vector<Node> result;
         for (auto elem : elements) {
             for(auto it = elem.begin(); it != elem.end(); ++it) {
                 result.push_back(*it);
@@ -116,7 +127,7 @@ public:
         return result;
     }
 
-    std::vector<std::list<Node*>> elements;
+    std::vector<std::list<Node>> elements;
     size_t open_size;
 
 };

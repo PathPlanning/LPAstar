@@ -12,13 +12,13 @@ public:
     ~LPAstar(void);
 
     void Initialize(const Map &map);
-    void UpdateVertex(Node *vertex, const Map &map);
+    void UpdateVertex(Node vertex, const Map &map);
     bool ComputeShortestPath( const Map &map);
     double GetCost(Cell from, Cell to) const;
     std::vector<double> CalculateKey(Node vertex, const Map &map);
 
-    std::vector<Node*> GetSuccessors(Node *curr, const Map &map);
-    std::vector<Node> FindNeighbors(Node *curr, const Map &map) const;
+    std::vector<Node> GetSuccessors(Node curr, const Map &map);
+    std::vector<Node> FindNeighbors(Node curr, const Map &map) const;
     Result FindThePath(const Map &map, Algorithm alg);
     void MakePrimaryPath(Node curNode);
 
