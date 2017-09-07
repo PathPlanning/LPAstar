@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<root>
+	<desc>This file contains a task (map + start-goal location) for a pathfinder as well as some additional data</desc>
+	<map>
+    <title>Example</title>
+    <width>16</width>
+    <height>16</height>
+    <cellsize>2.7</cellsize>
+    <startx>1</startx>
+    <starty>1</starty>
+    <finishx>9</finishx>
+    <finishy>9</finishy>
+    <grid>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 1 1 1 1 1 1 1 1 1 1 0 0 0</row>
+        <row>0 0 0 1 1 1 1 1 1 1 1 1 1 0 0 0</row>
+        <row>0 0 0 1 1 1 1 1 1 1 1 1 1 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+		</grid>
+    </map>
+    <algorithm>
+        <searchtype>astar</searchtype>
+        <hweight>1</hweight>
+        <metrictype>euclid</metrictype>
+        <breakingties>g-max</breakingties>
+        <allowdiagonal>1</allowdiagonal>
+        <allowsqueeze>false</allowsqueeze>
+        <cutcorners>true</cutcorners>
+    </algorithm>
+    <options>
+        <loglevel>1</loglevel>
+        <logpath />
+        <logfilename />
+    </options>
+</root>
