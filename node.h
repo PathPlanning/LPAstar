@@ -54,13 +54,18 @@ public:
     double rhs, g, h;
     std::vector<double> key;
     Cell point;
+    bool opened;
     const Node *parent;
 
-    Node() { key.resize(2, std::numeric_limits<double>::infinity()); }
+    Node() {
+        key.resize(2, std::numeric_limits<double>::infinity());
+        opened = false;
+    }
     Node(const Cell& p, const Node *c = nullptr) : g(std::numeric_limits<double>::infinity()),
         rhs(std::numeric_limits<double>::infinity()), point(p), parent(c)
     {
         key.resize(2, std::numeric_limits<double>::infinity());
+        opened = false;
     }
 
     inline void clear_state() { rhs = 0; g = 0; parent = nullptr; key[0] = 0; key[1] = 0;  }

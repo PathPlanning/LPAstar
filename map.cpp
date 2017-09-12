@@ -77,7 +77,16 @@ void Map::BuildGrid() {
 
 void Map::DamageTheMap(std::list<Node> path)
 {
+    Grid[4][0] = 1;
+    Grid[4][1] = 1;
+    Grid[4][2] = 1;
 
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
+            std::cout << Grid[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 bool Map::GetMap(const char *name)

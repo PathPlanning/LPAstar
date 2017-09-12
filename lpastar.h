@@ -4,6 +4,7 @@
 #include "map.h"
 #include "openlist.h"
 #include "heuristics.h"
+#include <set>
 
 class LPAstar
 {
@@ -11,15 +12,7 @@ public:
     LPAstar();
     ~LPAstar(void);
 
-    void Initialize(const Map &map);
-    void UpdateVertex(Node vertex, const Map &map);
-    bool ComputeShortestPath( const Map &map);
-    double GetCost(Cell from, Cell to) const;
-    std::vector<double> CalculateKey(Node vertex, const Map &map);
-
-    std::vector<Node> GetSuccessors(Node curr, const Map &map);
-    std::vector<Node> FindNeighbors(Node curr, const Map &map) const;
-    Result FindThePath(const Map &map, Algorithm alg);
+    Result FindThePath(Map &map, Algorithm alg);
     void MakePrimaryPath(Node curNode);
 
 private:
@@ -31,6 +24,17 @@ private:
     std::list<Node> path;
     OpenList OPEN;
     std::unordered_map<int, Node> NODES;
+
+    void Initialize(Map &map);
+    void UpdateVertex(Node vert, Map &map);
+    bool ComputeShortestPath( Map &map);
+    void CloseOpen(double height);
+    double GetCost(Cell from, Cell to, Map &map) const;
+    std::vector<double> CalculateKey(Node vertex, Map &map);
+
+    std::vector<Node> GetPredecessors(Node curr, Map &map);
+    std::vector<Node> GetSuccessors(Node curr, Map &map);
+    std::vector<Node> FindNeighbors(Node curr, Map &map) const;
 };
 
 #endif // LPASTAR_H
