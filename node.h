@@ -48,31 +48,55 @@ inline std::ostream& operator<< (std::ostream& out, const Cell &next) {
     return out;
 }
 
+struct Key{
+    double k1, k2;
+
+    Key() : k1(std::numeric_limits<double>::infinity()), k2(std::numeric_limits<double>::infinity()) {}
+    Key(double k1_, double k2_) : k1(k1_), k2(k2_) {}
+    Key(const Key& other) : k1(other.k1), k2(other.k2) {}
+
+    inline bool operator==(const Key& p) const {
+        return k1 == p.k1 && k2 == p.k2;
+    }
+    inline bool operator<(const Key& p) const {
+        return k1 < p.k1 || (k1 == p.k1 && k2 <= p.k2);
+    }
+
+    Key& operator=(const Key& other) {
+        if (this == &other) {
+            return *this;
+        }
+        k1 = other.k1;
+        k2 = other.k2;
+        return *this;
+    }
+
+};
+
 
 class Node {
 public:
     double rhs, g, h;
-    std::vector<double> key;
+    Key key;
     Cell point;
-    bool opened;
-    const Node *parent;
+    Node *parent;
 
-    Node() {
-        key.resize(2, std::numeric_limits<double>::infinity());
-        opened = false;
-    }
-    Node(const Cell& p, const Node *c = nullptr) : g(std::numeric_limits<double>::infinity()),
-        rhs(std::numeric_limits<double>::infinity()), point(p), parent(c)
-    {
-        key.resize(2, std::numeric_limits<double>::infinity());
-        opened = false;
-    }
-
-    inline void clear_state() { rhs = 0; g = 0; parent = nullptr; key[0] = 0; key[1] = 0;  }
+    Node() {}
+    Node(const Cell& p, Node *c = nullptr) : g(std::numeric_limits<double>::infinity()),
+        rhs(std::numeric_limits<double>::infinity()), point(p), parent(c) {}
 
     bool operator==(const Node& another) const {
         return point == another.point && rhs == another.rhs
                 &&parent == another.parent && g == another.g && h == another.h;
+    }
+
+    Node& operator=(const Node& other) {
+        point = other.point;
+        rhs = other.rhs;
+        g = other.g;
+        parent = other.parent;
+        key = other.key;
+        return *this;
     }
 
     bool IsConsistent() const {

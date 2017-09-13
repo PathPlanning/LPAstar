@@ -26,14 +26,13 @@ private:
     std::unordered_map<int, Node> NODES;
 
     void Initialize(Map &map);
-    void UpdateVertex(Node vert, Map &map);
-    bool ComputeShortestPath( Map &map);
+    void UpdateVertex(Node* u, Map &map);
+    bool ComputeShortestPath(Map &map);
     void CloseOpen(double height);
     double GetCost(Cell from, Cell to, Map &map) const;
-    std::vector<double> CalculateKey(Node vertex, Map &map);
+    Key CalculateKey(const Node &vertex, Map &map);
 
-    std::vector<Node> GetPredecessors(Node curr, Map &map);
-    std::vector<Node> GetSuccessors(Node curr, Map &map);
+    std::vector<Node *> GetSuccessors(Node curr, Map &map);
     std::vector<Node> FindNeighbors(Node curr, Map &map) const;
 };
 

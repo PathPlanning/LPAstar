@@ -6,20 +6,15 @@ inline int vertex(Cell item, int size) {
 }
 
 double LPAstar::GetCost(Cell from, Cell to, Map &map) const {
-    if (map.CellIsNeighbor(to, from))
-        return linecost * euclid_heuristic(from, to);
-    else
-        return std::numeric_limits<double>::infinity();
+    return linecost * euclid_heuristic(from, to);
 }
 
-std::vector<double> LPAstar::CalculateKey(Node vertex, Map &map) {
-    std::vector<double> res;
-    res.push_back(std::min(vertex.g, vertex.rhs + heuristic(vertex.point, map.goal, map)));
-    res.push_back(std::min(vertex.g, vertex.rhs));
+Key LPAstar::CalculateKey(const Node& vertex, Map &map) {
+    Key res(std::min(vertex.g, vertex.rhs + heuristic(vertex.point, map.goal, map)), std::min(vertex.g, vertex.rhs));
     return res;
 }
 
-LPAstar::LPAstar() { OPEN.open_size = 0; }
+LPAstar::LPAstar() { OPEN.set_size(0); }
 LPAstar::~LPAstar()
 {
     if (!NODES.empty()) NODES.erase(NODES.begin(), NODES.end());
@@ -40,22 +35,34 @@ Result LPAstar::FindThePath(Map &map, Algorithm alg)
         std::cout << elem.point;
     }
     std::cout << std::endl;
-    std::cout << "now\n";
     map.DamageTheMap(path);
-    std::vector<Node> damaged = {Node(Cell(0, 4)), Node(Cell(1, 4)), Node(Cell(2,4))};
-    //Node changed1 = NODES.find(vertex(Cell(1,5), map.height))->second;
-    //UpdateVertex(changed, map);
-    std::set<Node> update;
-    for (auto elem : damaged) {
-        for (auto el : GetSuccessors(elem, map)) {
-           update.insert(el);
+    std::vector<Node> damaged = {Node(Cell(1,4)), Node(Cell(2, 4)), Node(Cell(0,4)), Node(Cell(3,4))};
+    for (auto dam : damaged) {
+        for (auto neighbor: GetSuccessors(dam, map)) {
+            if (!(neighbor->point == map.start) && neighbor->parent->point == dam.point) {
+                Node min_val;
+                min_val.rhs = std::numeric_limits<double>::infinity();
+                for (auto pred : GetSuccessors(*neighbor, map)) {
+                    if (min_val.rhs > pred->g + GetCost(neighbor->point, pred->point, map)) {
+                        min_val.parent = pred;
+                        min_val.rhs = pred->g + GetCost(neighbor->point, pred->point, map);
+                    }
+                }
+                neighbor->rhs = min_val.rhs;
+                neighbor->parent = min_val.parent;
+                std::cout << "changed: "
+                          << neighbor->point << ' ' << neighbor->parent->point << std::endl;
+                UpdateVertex(neighbor, map);
+            }
         }
     }
-    for (auto elem: update) UpdateVertex(elem, map);
     if(ComputeShortestPath(map)){
         std::cout << "ALL OK\n";
     } else
         std::cout << "NOT OK\n";
+    for (auto elem: path) std::cout << elem.point << " ";
+    std::cout << std::endl;
+    return current_result;
 }
 
 
@@ -66,6 +73,8 @@ void LPAstar::Initialize(Map &map)
     start_node.rhs = 0;
     start_node.g = std::numeric_limits<double>::infinity();
     start_node.key = CalculateKey(start_node, map);
+    NODES[vertex(map.start, map.height)] = start_node;
+    start = &(NODES.find(vertex(map.start, map.height))->second);
 
     goal_node.g = std::numeric_limits<double>::infinity();
     goal_node.rhs = std::numeric_limits<double>::infinity();
@@ -74,7 +83,7 @@ void LPAstar::Initialize(Map &map)
     goal = &(NODES.find(vertex(map.goal, map.height))->second);
 
     OPEN.resize(map.width);
-    OPEN.put(start_node);
+    OPEN.put(start);
     current_result = Result(false, 0, 0, 0);
 }
 
@@ -84,99 +93,77 @@ void LPAstar::CloseOpen(double height) {
     }
 }
 
-void LPAstar::UpdateVertex(Node vert, Map &map)
+void LPAstar::UpdateVertex(Node* u, Map &map)
 {
-    if (!(vert.point == map.start)) {
-        double min_val = std::numeric_limits<double>::infinity();
-        for (auto elem : GetSuccessors(vert, map)) {
-            if (elem.g + GetCost(elem.point, vert.point, map) < min_val) {
-                min_val = elem.g + GetCost(elem.point, vert.point, map);
-                vert.rhs = min_val;
-                //std::cout << elem.point << std::endl;
-
-                vert.parent = &(NODES.find(vertex(elem.point, map.height))->second);
-                std::cout << "changed: " << vert.point << " " << elem.point << std::endl;
-            }
-        }
-    }
-    OPEN.remove_if(vert);
-    if (!vert.IsConsistent()) {
-        vert.key = CalculateKey(vert, map);
-        OPEN.put(vert);
+    if (!u->IsConsistent()) {
+        u->key = CalculateKey(*u, map);
+        OPEN.put(u); //check if it is already there
+    } else {
+        OPEN.remove_if(u);
     }
 }
 
 bool LPAstar::ComputeShortestPath(Map &map)
 {
     while (OPEN.top_key_less_than(CalculateKey(*goal, map)) || goal->rhs != goal->g) {
-        //OPEN.print_elements();
-        Node current = OPEN.get();
-        //NODES[vertex(current.point, map.height)] = current;
-        if (current.g > current.rhs) {
-            current.g = current.rhs;
-            current.opened = true;
-            NODES[vertex(current.point, map.height)] = current;
-            for (auto elem : GetSuccessors(current, map)) {
-                UpdateVertex(elem, map);
+        Node* current = OPEN.get();
+        if (current->g > current->rhs) {
+            current->g = current->rhs;
+            OPEN.pop();
+            for (auto elem : GetSuccessors(*current, map)) {
+                if (elem->rhs > current->g + GetCost(elem->point, current->point, map)) {
+                    elem->parent = current;
+                    elem->rhs = current->g + GetCost(elem->point, current->point, map);
+                    UpdateVertex(elem, map);
+                }
             }
         } else {
-            current.g = std::numeric_limits<double>::infinity();
-            current.opened = true;
-            NODES[vertex(current.point, map.height)] = current;
-            for (auto elem : GetSuccessors(current, map)) {
-                UpdateVertex(elem, map);
+            current->g = std::numeric_limits<double>::infinity();
+            std::vector<Node* > succ = GetSuccessors(*current, map);
+            succ.push_back(current);
+            for (auto elem : succ) {
+                if (!(elem->point == map.start) && elem->parent->point == current->point) {
+                    Node min_val;
+                    min_val.rhs = std::numeric_limits<double>::infinity();
+                    for (auto pred : GetSuccessors(*elem, map)) {
+                        if (pred->g + GetCost(pred->point, elem->point, map) < min_val.rhs) {
+                            min_val.rhs = pred->g + GetCost(pred->point, elem->point, map);
+                            min_val.point = pred->point;
+                            min_val.parent = pred;
+                        }
+                    }
+                    elem->rhs = min_val.rhs;
+                    elem->parent = min_val.parent;
+                    UpdateVertex(elem, map);
+                }
             }
-            UpdateVertex(current, map);
         }
-        if(current.parent) {
-            std::cout << current.point << "g " << current.g << " rhs" << current.rhs <<
-                  current.parent->point << std::endl;
-        }
-        std::cout << OPEN.top_key()[0] << ',' << OPEN.top_key()[1] << std::endl;
-        if (current.point == map.goal) {
-            NODES[vertex(current.point, map.height)] = current;
-            for (auto elem : NODES) elem.second.opened = false;
-            goal = &(NODES.find(vertex(current.point, map.height))->second);
-            std::cout << "goal" << goal->point << goal->rhs << " "<< goal->g <<std::endl;
+        if(current->parent) {
+            std::cout << current->point << "g " << current->g << " rhs" << current->rhs <<
+                  current->parent->point << std::endl;
         }
 
     }
     if (goal->g != std::numeric_limits<double>::infinity()) {
-        current_result = Result(true, OPEN.open_size + NODES.size(), 0, goal->g);
-        std::cout << "nowww\n";
+        current_result = Result(true, OPEN.size_of_open() + NODES.size(), 0, goal->g);
         std::cout << goal->g << std::endl;
         MakePrimaryPath(*goal);
-        CloseOpen(map.height);
         return true;
     }
     return false;
 }
 
-std::vector<Node> LPAstar::GetPredecessors(Node current, Map &map) {
-    std::vector<Node> result;
-    //std::cout << current.point << std::endl;
-    for(auto elem : FindNeighbors(current, map)) {
-        if(NODES.count(vertex(elem.point, map.height))) { //if vertex wasn't previously examined
-            Node node = NODES.find(vertex(elem.point, map.height))->second;
-            //if (node.opened) {
-                result.push_back(node);
-            //}
-        }
-    }
-    return result;
-}
 
-
-std::vector<Node> LPAstar::GetSuccessors(Node current, Map &map) {
-    std::vector<Node> result;
+std::vector<Node* > LPAstar::GetSuccessors(Node current, Map &map) {
+    std::vector<Node*> result;
     for(auto elem : FindNeighbors(current, map)) {
         if(!NODES.count(vertex(elem.point, map.height))) { //if vertex wasn't previously examined
             elem.g =  std::numeric_limits<double>::infinity();
             elem.rhs = std::numeric_limits<double>::infinity();
-            result.push_back(elem);
+            NODES[vertex(elem.point, map.height)] = elem;
+            result.push_back(&(NODES.find(vertex(elem.point, map.height))->second));
         } else {
-            Node node = NODES.find(vertex(elem.point, map.height))->second;
-            result.push_back(node);
+            result.push_back(&(NODES.find(vertex(elem.point, map.height))->second));
         }
     }
     return result;

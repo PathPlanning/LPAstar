@@ -63,8 +63,6 @@ struct Result {
         length = l;
         time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
     }
-
-    std::vector<TiXmlElement *> lowlev;
 };
 
 

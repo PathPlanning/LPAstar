@@ -77,9 +77,10 @@ void Map::BuildGrid() {
 
 void Map::DamageTheMap(std::list<Node> path)
 {
-    Grid[4][0] = 1;
-    Grid[4][1] = 1;
     Grid[4][2] = 1;
+    Grid[4][1] = 1;
+    Grid[4][0] = 1;
+    Grid[4][3] = 1;
 
     for (size_t i = 0; i < height; ++i) {
         for (size_t j = 0; j < width; ++j) {
@@ -291,5 +292,4 @@ bool Map::GetMap(const char *name)
             }
         }
     } else exit_error(CNS_ROOT);
-    std::cout << "goooo\n";
 }

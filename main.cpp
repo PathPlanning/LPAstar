@@ -16,7 +16,6 @@ int main(int argc, char *argv[])
     Map map;
     map.GetMap(file_name);
     LPAstar path;
-    std::cout << "what?\n";
     Result res = path.FindThePath(map, map.algorithm_info);
     std::cout << res.length << std::endl;
     return 0;
