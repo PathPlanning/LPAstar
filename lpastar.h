@@ -40,8 +40,9 @@ private:
     Key CalculateKey(const Node &vertex, Map &map);
 
     std::vector<Node *> GetSuccessors(Node *curr, Map &map);
+    std::list<Node *> GetSurroundings(Node *current, Map &map);
     Node GetMinPredecessor(Node* curr, Map &map);
-    std::vector<Node> FindNeighbors(Node* curr, Map &map) const;
+    std::list<Node> FindNeighbors(Node* curr, Map &map) const;
 };
 
 #endif // LPASTAR_H

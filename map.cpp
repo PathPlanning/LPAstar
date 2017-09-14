@@ -87,10 +87,10 @@ Changes Map::DamageTheMap(std::list<Node*> path)
     Changes result;
     std::random_device rd;     // only used once to initialise (seed) engine
     std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-    std::uniform_int_distribution<int> uni(2, path.size() - 3); // guaranteed unbiased
+    std::uniform_int_distribution<int> uni(3, path.size() - 3); // guaranteed unbiased
 
     auto random_number = uni(rng);
-    //random_number = path.size() - 3;
+//    random_number = 2;
     int i = 0;
     Node* crash = path.front();
     auto it = path.begin();
@@ -111,12 +111,12 @@ Changes Map::DamageTheMap(std::list<Node*> path)
             }
         }
     }
-    for (size_t i = 0; i < height; ++i) {
+    /*for (size_t i = 0; i < height; ++i) {
         for (size_t j = 0; j < width; ++j) {
             std::cout << Grid[i][j] << " ";
         }
         std::cout << std::endl;
-    }
+    }*/
     return result;
 }
 

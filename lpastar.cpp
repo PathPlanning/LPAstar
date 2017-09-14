@@ -5,6 +5,18 @@ inline int vertex(Cell item, int size) {
     return item.x * size + item.y;
 }
 
+inline bool CutOrSqueeze(Node* to, Node* from) {
+    if (to->point.x == from->point.x) {
+        return (to->parent->point == Cell(from->point.x - 1, from->point.y) ||
+                to->parent->point == Cell(from->point.x + 1, from->point.y));
+    }
+    else if (to->point.y == from->point.y) {
+        return (to->parent->point == Cell(from->point.x, from->point.y - 1) ||
+                to->parent->point == Cell(from->point.x, from->point.y + 1));
+    }
+    else return false;
+}
+
 double LPAstar::GetCost(Cell from, Cell to, Map &map) const {
     if (map.CellIsNeighbor(from, to)) {
         if (from.x == to.x || from.y == to.y) return 1;
@@ -39,14 +51,13 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
         std::cout << "Done\n";
     std::cout << current_result.pathlength <<std::endl;
     Changes changes = map.DamageTheMap(path);
-    //std::vector<Node> damaged = {Node(Cell(1,4)), Node(Cell(2, 4)), Node(Cell(0,4)), Node(Cell(3,4))};
     for (auto dam : changes.occupied) {
         if (NODES.count(vertex(dam, map.height))) {
             Node* d = &(NODES.find(vertex(dam, map.height))->second);
             OPEN.remove_if(d);
-            for (auto neighbor: GetSuccessors(d, map)) {
+            for (auto neighbor: GetSurroundings(d, map)) {
                 //std::cout << "n: " << neighbor->point << std::endl;
-                if (!(neighbor->point == map.start) && neighbor->parent->point == dam) {
+                if (!(neighbor->point == map.start) && (neighbor->parent->point == dam || CutOrSqueeze(neighbor, d))) {
                     Node min_val = GetMinPredecessor(neighbor, map);
                     neighbor->rhs = min_val.rhs;
                     neighbor->parent = min_val.parent;
@@ -67,6 +78,7 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
     //std::cout << std::endl;
     return current_result;
 }
+
 
 
 void LPAstar::Initialize(Map &map)
@@ -148,7 +160,7 @@ bool LPAstar::ComputeShortestPath(Map &map)
         std::cout << goal->g << std::endl;
         MakePrimaryPath(goal);
         current_result.lppath = &path;
-        map.PrintPath(path);
+        //map.PrintPath(path);
         return true;
     } else {
         current_result.pathfound = false;
@@ -198,11 +210,35 @@ std::vector<Node* > LPAstar::GetSuccessors(Node* current, Map &map) {
     return result;
 }
 
-std::vector<Node> LPAstar::FindNeighbors(Node* n, Map &map) const {
-    std::vector<Node> result;
-    int x = n->point.x;
+std::list<Node> LPAstar::FindNeighbors(Node* n, Map &map) const {
+    Node newNode;
+    Cell curNode = n->point;
+    std::list<Node> successors;
+    for (int i = -1; i <= +1; i++)
+        for (int j = -1; j <= +1; j++)
+            if ((i != 0 || j != 0) && map.CellOnGrid(Cell(curNode.x + j, curNode.y + i)) &&
+                    (map.CellIsTraversable(Cell(curNode.x + j, curNode.y + i)))) {
+                if (i != 0 && j != 0) {
+                    if (!opt.allowdiagonal)
+                        continue;
+                    else if (!opt.cutcorners) {
+                        if (map.CellIsObstacle(Cell(curNode.x + j, curNode.y)) ||
+                                map.CellIsObstacle(Cell(curNode.x, curNode.y + i)))
+                            continue;
+                    }
+                    else if (!opt.allowsqueeze) {
+                        if (map.CellIsObstacle(Cell( curNode.x + j, curNode.y)) &&
+                                map.CellIsObstacle(Cell( curNode.x, curNode.y + i)))
+                            continue;
+                    }
+                }
+                newNode = Node(Cell(curNode.x + j, curNode.y + i), n);
+                successors.push_front(newNode);
+            }
+    return successors;
+    /*int x = n->point.x;
     int y = n->point.y;
-    if(opt.allowdiagonal) {
+    if(!opt.allowdiagonal) {
         for (int k = y - 1; k <= y + 1; ++k) {
             for (int l = x - 1; l <= x + 1; ++l) {
                 if (!(k == y && l == x) && map.CellIsNeighbor(Cell(l, k), n->point)) {
@@ -217,6 +253,37 @@ std::vector<Node> LPAstar::FindNeighbors(Node* n, Map &map) const {
         for (int l = y - 1; l <= y + 1; ++l)
             if (l != y && map.CellOnGrid(Cell(x, l)) && map.CellIsTraversable(Cell(x, l)))
                 result.push_back(Node(Cell(x, l), n));
+    }
+    return result;*/
+}
+
+std::list<Node*> LPAstar::GetSurroundings(Node *current, Map &map) {
+    std::list<Node> result1;
+    int x = current->point.x;
+    int y = current->point.y;
+    if(opt.allowdiagonal) {
+        for (int k = y - 1; k <= y + 1; ++k) {
+            for (int l = x - 1; l <= x + 1; ++l) {
+                if (!(k == y && l == x) && map.CellOnGrid(Cell(l, k)) && map.CellIsTraversable(Cell(l, k))) {
+                    result1.push_front(Node(Cell(l, k)));
+                }
+            }
+        }
+    } else {
+        for (int k = x - 1; k <= x + 1; ++k)
+            if (k != x && map.CellOnGrid(Cell(k, y)) && map.CellIsTraversable(Cell(k, y)))
+                result1.push_front(Node(Cell(k, y)));
+        for (int l = y - 1; l <= y + 1; ++l)
+            if (l != y && map.CellOnGrid(Cell(x, l)) && map.CellIsTraversable(Cell(x, l)))
+                result1.push_front(Node(Cell(x, l)));
+    }
+    std::list<Node*> result;
+    for(auto elem : result1) {
+        if(!NODES.count(vertex(elem.point, map.height))) { //if vertex wasn't previously examined
+            continue;
+        } else {
+            result.push_back(&(NODES.find(vertex(elem.point, map.height))->second));
+        }
     }
     return result;
 }
