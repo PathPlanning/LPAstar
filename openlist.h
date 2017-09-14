@@ -16,7 +16,10 @@ public:
     }
 
     inline bool empty() const {
-        return !open_size;
+        for (auto elem : elements) {
+            if(!elem.empty()) return false;
+        }
+        return true;
     }
 
     inline size_t size_of_open() const {
@@ -122,7 +125,7 @@ public:
                     std::cout << (*it)->point << (*it)->key.k1 << " ";
                 }
                 std::cout << std::endl;
-            }
+            } else std::cout << "NNAH\n";
         }
     }
     void set_size(int s) { open_size = 0; }

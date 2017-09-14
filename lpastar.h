@@ -18,6 +18,7 @@ public:
 
     LPASearchResult FindThePath(Map &map, EnvironmentOptions options);
     void MakePrimaryPath(Node* curNode);
+    void makeSecondaryPath();
 
 private:
     Node *start;
@@ -25,7 +26,8 @@ private:
     int number_of_steps;
 
     EnvironmentOptions opt;
-    std::list<Node *> path;
+    std::list<Node> path;
+    std::list<Node> hpath;
 
     double linecost;
     LPASearchResult current_result;

@@ -20,7 +20,7 @@ class Map
         Map(const Map& orig);
         ~Map();
 
-        Changes DamageTheMap(std::list<Node *> path);
+        Changes DamageTheMap(std::list<Node> path);
         bool GetMap(const char *name);
         bool CellIsTraversable (Cell curr) const;
         bool CellOnGrid (Cell curr) const;
@@ -33,7 +33,7 @@ class Map
         int * operator [] (int i);
         const int * operator [] (int i) const;
 
-        void PrintPath(std::list<Node*> path);
+        void PrintPath(std::list<Node> path);
 
         int     height, width;
         Cell    start;

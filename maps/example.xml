@@ -36,7 +36,7 @@
         <breakingties>g-max</breakingties>
         <allowdiagonal>1</allowdiagonal>
         <allowsqueeze>0</allowsqueeze>
-        <cutcorners>1</cutcorners>
+        <cutcorners>0</cutcorners>
     </algorithm>
     <options>
         <loglevel>1</loglevel>

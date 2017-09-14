@@ -82,7 +82,7 @@ void Map::BuildGrid() {
     }
 }
 
-Changes Map::DamageTheMap(std::list<Node*> path)
+Changes Map::DamageTheMap(std::list<Node> path)
 {
     Changes result;
     std::random_device rd;     // only used once to initialise (seed) engine
@@ -90,9 +90,9 @@ Changes Map::DamageTheMap(std::list<Node*> path)
     std::uniform_int_distribution<int> uni(3, path.size() - 3); // guaranteed unbiased
 
     auto random_number = uni(rng);
-//    random_number = 2;
+    random_number = 4;
     int i = 0;
-    Node* crash = path.front();
+    Node crash = path.front();
     auto it = path.begin();
     while (it != path.end()) {
         if (i++ == random_number) {
@@ -101,8 +101,8 @@ Changes Map::DamageTheMap(std::list<Node*> path)
         }
         ++it;
     }
-    int x = crash->point.x;
-    int y = crash->point.y;
+    int x = crash.point.x;
+    int y = crash.point.y;
     for (int k = y - 1; k <= y + 1; ++k) {
         for (int l = x - 1; l <= x + 1; ++l) {
             if (CellIsTraversable(Cell(l, k))) {
@@ -120,12 +120,12 @@ Changes Map::DamageTheMap(std::list<Node*> path)
     return result;
 }
 
-void Map::PrintPath(std::list<Node*> path) {
+void Map::PrintPath(std::list<Node> path) {
     for (size_t i = 0; i < height; ++i) {
         for (size_t j = 0; j < width; ++j) {
             bool p = false;
             for (auto elem : path) {
-                if (elem->point == Cell(j,i)) {
+                if (elem.point == Cell(j,i)) {
                     std::cout << "* ";
                     p = true;
                     break;

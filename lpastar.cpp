@@ -43,6 +43,7 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
     opt = options;
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
+    number_of_steps = 0;
     Initialize(map);
 
     if(!ComputeShortestPath(map))
@@ -74,6 +75,8 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
         std::cout << "NOT OK\n";
     end = std::chrono::system_clock::now();
     current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+    makeSecondaryPath();
+    current_result.hppath = &hpath;
     //for (auto elem: path) std::cout << elem->point << " ";
     //std::cout << std::endl;
     return current_result;
@@ -120,7 +123,8 @@ void LPAstar::UpdateVertex(Node* u, Map &map)
 
 bool LPAstar::ComputeShortestPath(Map &map)
 {
-    while (OPEN.top_key_less_than(CalculateKey(*goal, map)) || goal->rhs != goal->g) {
+    while (!OPEN.empty() && OPEN.top_key_less_than(CalculateKey(*goal, map)) || goal->rhs != goal->g) {
+        ++number_of_steps;
         Node* current = OPEN.get();
         if (current->g > current->rhs) {
             current->g = current->rhs;
@@ -149,18 +153,19 @@ bool LPAstar::ComputeShortestPath(Map &map)
         /*if(current->parent) {
             std::cout << current->point << "g " << current->g << " rhs" << current->rhs <<
                   current->parent->point << std::endl;
-        }*/        //std::cout << OPEN.top_key().k1 << std::endl;
+        }*/       //std::cout << OPEN.top_key().k1 << std::endl;
         //OPEN.print_elements();
 
     }
     if (goal->g != std::numeric_limits<double>::infinity()) {
         current_result.pathfound = true;
+        current_result.numberofsteps = number_of_steps;
         current_result.nodescreated = NODES.size();
         current_result.pathlength = goal->g;
         std::cout << goal->g << std::endl;
         MakePrimaryPath(goal);
         current_result.lppath = &path;
-        //map.PrintPath(path);
+        map.PrintPath(path);
         return true;
     } else {
         current_result.pathfound = false;
@@ -291,10 +296,31 @@ std::list<Node*> LPAstar::GetSurroundings(Node *current, Map &map) {
 void LPAstar::MakePrimaryPath(Node *curNode)
 {
     path.clear();
-    Node* current = curNode;
-    while (current->parent) {
+    Node current = *curNode;
+    while (current.parent) {
         path.push_front(current);
-        current = current->parent;
+        current = *current.parent;
     }
     path.push_front(current);
+}
+
+void LPAstar::makeSecondaryPath()
+{
+    std::list<Node>::const_iterator iter = path.begin();
+    int curI, curJ, nextI, nextJ, moveI, moveJ;
+    hpath.push_back(*iter);
+    while (iter != --path.end()) {
+        curI = iter->point.y;
+        curJ = iter->point.x;
+        ++iter;
+        nextI = iter->point.y;
+        nextJ = iter->point.x;
+        moveI = nextI - curI;
+        moveJ = nextJ - curJ;
+        ++iter;
+        if ((iter->point.y - nextI) != moveI || (iter->point.x - nextJ) != moveJ)
+            hpath.push_back(*(--iter));
+        else
+            --iter;
+    }
 }

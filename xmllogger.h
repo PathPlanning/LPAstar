@@ -14,13 +14,13 @@ public:
 
     void saveLog();
 
-    void writeToLogMap(const Map &Map, const std::list<ANode> &path);
+    void writeToLogMap(const Map &Map, const std::list<Node> &path);
 
     void writeToLogOpenClose(const std::vector<std::list<ANode>> &open, const std::unordered_map<int, ANode> &close, bool last);
 
-    void writeToLogPath(const std::list<ANode> &path);
+    void writeToLogPath(const std::list<Node> &path);
 
-    void writeToLogHPpath(const std::list<ANode> &hppath);
+    void writeToLogHPpath(const std::list<Node> &hppath);
 
     void writeToLogNotFound();
 

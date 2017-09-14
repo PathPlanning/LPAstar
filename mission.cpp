@@ -70,7 +70,10 @@ void Mission::startSearch()
 void Mission::printSearchResultsToConsole()
 {
 
-    std::cout << "LPApath " << lparesult.pathlength << std::endl;
+    if (!lparesult.pathfound)
+        std::cout << "Path NOT found!!\n";
+    if(lparesult.pathfound)
+        std::cout << "LPApath " << lparesult.pathlength << std::endl;
     std::cout << "Path ";
     if (!sr.pathfound)
         std::cout << "NOT ";
@@ -92,10 +95,10 @@ void Mission::printSearchResultsToConsole()
 void Mission::saveSearchResultsToLog()
 {
     logger->writeToLogSummary(lparesult.numberofsteps, lparesult.nodescreated, lparesult.pathlength, lparesult.time, map.CellSize, sr.pathlength, correct);
-    if (sr.pathfound) {
-        logger->writeToLogPath(*sr.lppath);
-        logger->writeToLogHPpath(*sr.hppath);
-        logger->writeToLogMap(map, *sr.lppath);
+    if (lparesult.pathfound) {
+        logger->writeToLogPath(*lparesult.lppath);
+        logger->writeToLogHPpath(*lparesult.hppath);
+        logger->writeToLogMap(map, *lparesult.lppath);
     } else
         logger->writeToLogNotFound();
     logger->saveLog();
