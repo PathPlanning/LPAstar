@@ -3,8 +3,12 @@
 
 #include "map.h"
 #include "openlist.h"
+#include "searchresult.h"
 #include "heuristics.h"
+#include "environmentoptions.h"
+#include <unordered_map>
 #include <set>
+#include <chrono>
 
 class LPAstar
 {
@@ -12,16 +16,19 @@ public:
     LPAstar();
     ~LPAstar(void);
 
-    Result FindThePath(Map &map, Algorithm alg);
-    void MakePrimaryPath(Node curNode);
+    LPASearchResult FindThePath(Map &map, EnvironmentOptions options);
+    void MakePrimaryPath(Node* curNode);
 
 private:
     Node *start;
     Node *goal;
+    int number_of_steps;
+
+    EnvironmentOptions opt;
+    std::list<Node *> path;
 
     double linecost;
-    Result current_result;
-    std::list<Node> path;
+    LPASearchResult current_result;
     OpenList OPEN;
     std::unordered_map<int, Node> NODES;
 
@@ -32,8 +39,9 @@ private:
     double GetCost(Cell from, Cell to, Map &map) const;
     Key CalculateKey(const Node &vertex, Map &map);
 
-    std::vector<Node *> GetSuccessors(Node curr, Map &map);
-    std::vector<Node> FindNeighbors(Node curr, Map &map) const;
+    std::vector<Node *> GetSuccessors(Node *curr, Map &map);
+    Node GetMinPredecessor(Node* curr, Map &map);
+    std::vector<Node> FindNeighbors(Node* curr, Map &map) const;
 };
 
 #endif // LPASTAR_H

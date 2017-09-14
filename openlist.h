@@ -2,7 +2,7 @@
 #define OPENLIST_H
 
 #include "node.h"
-#include "gl.const.h"
+#include "gl_const.h"
 #include <list>
 #include <vector>
 
@@ -78,34 +78,27 @@ public:
     }
 
     inline void put (Node* item) {
-        bool exists = false;
-        std::list<Node*>::iterator it = elements[item->point.x].begin();
-        std::list<Node*>::iterator position = elements[item->point.x].end();
-        if (elements[item->point.x].empty()) {
-            elements[item->point.x].emplace_back(item);
+        if (elements[item->point.y].empty()) {
+            elements[item->point.y].emplace_back(item);
             ++open_size;
             return;
         }
-        while (it != elements[item->point.x].end()) {
-            if ((*it)->point == item->point) {
-                (*it)->key = item->key;
-                exists = true;
-                break;
-            }
+        elements[item->point.y].remove_if([item](Node* curr) { return curr->point == item->point; });
+        std::list<Node*>::iterator it = elements[item->point.y].begin();
+        std::list<Node*>::iterator position = elements[item->point.y].end();
+        while (it != elements[item->point.y].end()) {
             if ((*it)->key < item->key) {
                 position = it;
             }
             ++it;
         }
-        if (!exists) {
-            if (++position != elements[item->point.x].end()) elements[item->point.x].emplace(position, item);
-            else elements[item->point.x].emplace_back(item);
-            ++open_size;
-        }
+        if (++position != elements[item->point.y].end()) elements[item->point.y].emplace(position, item);
+        else elements[item->point.y].emplace_back(item);
+        ++open_size;
     }
 
     inline void remove_if(Node* item) {
-        elements[item->point.x].remove_if([item](Node* curr) { return curr->point == item->point; });
+        elements[item->point.y].remove_if([item](Node* curr) { return curr->point == item->point; });
     }
 
     inline void resize(int value) {
@@ -126,7 +119,7 @@ public:
         for (auto elem : elements) {
             if (!elem.empty()) {
                 for(auto it = elem.begin(); it != elem.end(); ++it) {
-                    std::cout << (*it)->point << " ";
+                    std::cout << (*it)->point << (*it)->key.k1 << " ";
                 }
                 std::cout << std::endl;
             }

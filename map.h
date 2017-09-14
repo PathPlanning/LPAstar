@@ -2,12 +2,16 @@
 #define	MAP_H
 #include <iostream>
 #include "node.h"
+#include "environmentoptions.h"
+#include "gl_const.h"
 #include <list>
-#include "parser.h"
 #include "structures.h"
+#include "tinyxml2.h"
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <random>
+
 
 class Map
 {
@@ -16,7 +20,7 @@ class Map
         Map(const Map& orig);
         ~Map();
 
-        void DamageTheMap(std::list<Node> path);
+        Changes DamageTheMap(std::list<Node *> path);
         bool GetMap(const char *name);
         bool CellIsTraversable (Cell curr) const;
         bool CellOnGrid (Cell curr) const;
@@ -29,13 +33,17 @@ class Map
         int * operator [] (int i);
         const int * operator [] (int i) const;
 
+        void PrintPath(std::list<Node*> path);
+
         int     height, width;
         Cell    start;
         Cell    goal;
-        Algorithm algorithm_info;
+        EnvironmentOptions algorithm_info;
+        double  CellSize;
+
 
     private:
-        double  CellSize;
+
         int **  Grid;
 
         void BuildGrid();

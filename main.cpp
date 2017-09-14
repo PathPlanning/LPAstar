@@ -1,23 +1,48 @@
 #include <iostream>
 #include "lpastar.h"
+#include "mission.h"
 
 int main(int argc, char *argv[])
 {
-    try {
-        if(!argv[1]) {
-            throw "No input file. Please try again";
-        }
-    }
-    catch (const char *exc) {
-        std::cout << exc << std::endl;
+    if(argc < 2) {
+        std::cout<<"Error! Pathfinding task file (XML) is not specified!"<<std::endl;
         return 0;
     }
-    char *file_name = argv[1];
-    Map map;
-    map.GetMap(file_name);
-    LPAstar path;
-    Result res = path.FindThePath(map, map.algorithm_info);
-    std::cout << res.length << std::endl;
+
+    Mission mission(argv[1]);
+
+    std::cout<<argv[1]<<std::endl;
+    std::cout<<"Parsing the map from XML:"<<std::endl;
+
+    if(!mission.getMap()) {
+        std::cout<<"Incorrect map! Program halted!"<<std::endl;
+    }
+    else {
+        std::cout<<"Map OK!"<<std::endl<<"Parsing configurations (algorithm, log) from XML:"<<std::endl;
+        if(!mission.getConfig())
+            std::cout<<"Incorrect configurations! Program halted!"<<std::endl;
+        else {
+            std::cout<<"Configurations OK!"<<std::endl<<"Creating log channel:"<<std::endl;
+
+            if(!mission.createLog())
+                std::cout<<"Log chanel has not been created! Program halted!"<<std::endl;
+            else {
+                std::cout<<"Log OK!"<<std::endl<<"Start searching the path:"<<std::endl;
+
+                mission.createEnvironmentOptions();
+                mission.createSearch();
+                mission.startSearch();
+
+                std::cout<<"Search is finished!"<<std::endl;
+
+                mission.printSearchResultsToConsole();
+                mission.saveSearchResultsToLog();
+
+                std::cout<<"Results are saved (if chosen) via created log channel."<<std::endl;
+            }
+        }
+    }
+
     return 0;
 }
 

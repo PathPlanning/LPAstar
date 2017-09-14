@@ -113,5 +113,16 @@ inline std::ostream& operator<< (std::ostream& out, const Node &next) {
     return out;
 }
 
+struct ANode
+{
+    int     i, j;
+    double  F, g, H;
+    ANode    *parent;
+
+    bool operator== (const ANode &other) const {
+        return i == other.i && j == other.j;
+    }
+};
+
 
 #endif // NODE_H

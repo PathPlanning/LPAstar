@@ -19,14 +19,21 @@ Map::~Map()
     }
 }
 
+int * Map::operator [] (int i) {
+    return Grid[i];
+}
+const int * Map::operator [] (int i) const {
+    return Grid[i];
+}
+
 bool Map::CellIsTraversable(Cell curr) const
 {
-    return (Grid[curr.y][curr.x] == CN_CELL_IS_NOT_BLOCKED);
+    return (Grid[curr.y][curr.x] == CN_GC_NOOBS);
 }
 
 bool Map::CellIsObstacle(Cell curr) const
 {
-    return (Grid[curr.y][curr.x] != CN_CELL_IS_NOT_BLOCKED);
+    return (Grid[curr.y][curr.x] != CN_GC_NOOBS);
 }
 
 bool Map::CellOnGrid(Cell curr) const
@@ -75,221 +82,326 @@ void Map::BuildGrid() {
     }
 }
 
-void Map::DamageTheMap(std::list<Node> path)
+Changes Map::DamageTheMap(std::list<Node*> path)
 {
-    Grid[4][2] = 1;
-    Grid[4][1] = 1;
-    Grid[4][0] = 1;
-    Grid[4][3] = 1;
+    Changes result;
+    std::random_device rd;     // only used once to initialise (seed) engine
+    std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+    std::uniform_int_distribution<int> uni(2, path.size() - 3); // guaranteed unbiased
 
+    auto random_number = uni(rng);
+    //random_number = path.size() - 3;
+    int i = 0;
+    Node* crash = path.front();
+    auto it = path.begin();
+    while (it != path.end()) {
+        if (i++ == random_number) {
+            crash = *it;
+            break;
+        }
+        ++it;
+    }
+    int x = crash->point.x;
+    int y = crash->point.y;
+    for (int k = y - 1; k <= y + 1; ++k) {
+        for (int l = x - 1; l <= x + 1; ++l) {
+            if (CellIsTraversable(Cell(l, k))) {
+                result.occupied.push_back(Cell(l, k));
+                Grid[k][l] = CN_GC_OBS;
+            }
+        }
+    }
     for (size_t i = 0; i < height; ++i) {
         for (size_t j = 0; j < width; ++j) {
             std::cout << Grid[i][j] << " ";
         }
         std::cout << std::endl;
     }
+    return result;
 }
 
-bool Map::GetMap(const char *name)
+void Map::PrintPath(std::list<Node*> path) {
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
+            bool p = false;
+            for (auto elem : path) {
+                if (elem->point == Cell(j,i)) {
+                    std::cout << "* ";
+                    p = true;
+                    break;
+                }
+            }
+            if(!p) std::cout << Grid[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+bool Map::GetMap(const char *FileName)
 {
-    TiXmlDocument doc(name);
-    try {
-        if(doc.LoadFile()) {
-            std::cout << "Load sucsses" << std::endl;
-        } else {
-            throw "ERROR: Load failed. Try another file";
+    int rowiter = 0, grid_i = 0, grid_j = 0;
+
+    tinyxml2::XMLElement *root = 0, *map = 0, *element = 0, *mapnode;
+
+    std::string value;
+    std::stringstream stream;
+
+    bool hasGridMem = false, hasGrid = false, hasHeight = false, hasWidth = false, hasSTX = false, hasSTY = false, hasFINX = false, hasFINY = false, hasCellSize = false;
+
+    tinyxml2::XMLDocument doc;
+
+    // Load XML File
+    if (doc.LoadFile(FileName) != tinyxml2::XMLError::XML_SUCCESS) {
+        std::cout << "Error opening XML file!" << std::endl;
+        return false;
+    }
+    // Get ROOT element
+    root = doc.FirstChildElement(CNS_TAG_ROOT);
+    if (!root) {
+        std::cout << "Error! No '" << CNS_TAG_ROOT << "' tag found in XML file!" << std::endl;
+        return false;
+    }
+
+    // Get MAP element
+    map = root->FirstChildElement(CNS_TAG_MAP);
+    if (!map) {
+        std::cout << "Error! No '" << CNS_TAG_MAP << "' tag found in XML file!" << std::endl;
+        return false;
+    }
+
+    for (mapnode = map->FirstChildElement(); mapnode; mapnode = mapnode->NextSiblingElement()) {
+        element = mapnode->ToElement();
+        value = mapnode->Value();
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+        stream.str("");
+        stream.clear();
+        stream << element->GetText();
+
+        if (!hasGridMem && hasHeight && hasWidth) {
+            Grid = new int *[height];
+            for (int i = 0; i < height; ++i)
+                Grid[i] = new int[width];
+            hasGridMem = true;
+        }
+
+        if (value == CNS_TAG_HEIGHT) {
+            if (hasHeight) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_HEIGHT << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_HEIGHT << "' =" << height << "will be used."
+                          << std::endl;
+            }
+            else {
+                if (!((stream >> height) && (height > 0))) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_HEIGHT
+                              << "' tag encountered (or could not convert to integer)." << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_HEIGHT << "' tag should be an integer >=0" << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_HEIGHT
+                              << "' tag will be encountered later..." << std::endl;
+                }
+                else
+                    hasHeight = true;
+            }
+        }
+        else if (value == CNS_TAG_WIDTH) {
+            if (hasWidth) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_WIDTH << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_WIDTH << "' =" << width << "will be used." << std::endl;
+            }
+            else {
+                if (!((stream >> width) && (width > 0))) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_WIDTH
+                              << "' tag encountered (or could not convert to integer)." << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_WIDTH << "' tag should be an integer AND >0" << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_WIDTH
+                              << "' tag will be encountered later..." << std::endl;
+
+                }
+                else
+                    hasWidth = true;
+            }
+        }
+        else if (value == CNS_TAG_CELLSIZE) {
+            if (hasCellSize) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_CELLSIZE << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_CELLSIZE << "' =" << CellSize << "will be used."
+                          << std::endl;
+            }
+            else {
+                if (!((stream >> CellSize) && (CellSize > 0))) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_CELLSIZE
+                              << "' tag encountered (or could not convert to double)." << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_CELLSIZE
+                              << "' tag should be double AND >0. By default it is defined to '1'" << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_CELLSIZE
+                              << "' tag will be encountered later..." << std::endl;
+                }
+                else
+                    hasCellSize = true;
+            }
+        }
+        else if (value == CNS_TAG_STX) {
+            if (!hasWidth) {
+                std::cout << "Error! '" << CNS_TAG_STX << "' tag encountered before '" << CNS_TAG_WIDTH << "' tag."
+                          << std::endl;
+                return false;
+            }
+
+            if (hasSTX) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_STX << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_STX << "' =" << start.x << "will be used." << std::endl;
+            }
+            else {
+                if (!(stream >> start.x && start.x >= 0 && start.x < width)) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_STX
+                              << "' tag encountered (or could not convert to integer)" << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_STX << "' tag should be an integer AND >=0 AND < '"
+                              << CNS_TAG_WIDTH << "' value, which is " << width << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_STX
+                              << "' tag will be encountered later..." << std::endl;
+                }
+                else
+                    hasSTX = true;
+            }
+        }
+        else if (value == CNS_TAG_STY) {
+            if (!hasHeight) {
+                std::cout << "Error! '" << CNS_TAG_STY << "' tag encountered before '" << CNS_TAG_HEIGHT << "' tag."
+                          << std::endl;
+                return false;
+            }
+
+            if (hasSTY) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_STY << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_STY << "' =" << start.y << "will be used." << std::endl;
+            }
+            else {
+                if (!(stream >> start.y && start.y >= 0 && start.y < height)) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_STY
+                              << "' tag encountered (or could not convert to integer)" << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_STY << "' tag should be an integer AND >=0 AND < '"
+                              << CNS_TAG_HEIGHT << "' value, which is " << height << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_STY
+                              << "' tag will be encountered later..." << std::endl;
+                }
+                else
+                    hasSTY = true;
+            }
+        }
+        else if (value == CNS_TAG_FINX) {
+            if (!hasWidth) {
+                std::cout << "Error! '" << CNS_TAG_FINX << "' tag encountered before '" << CNS_TAG_WIDTH << "' tag."
+                          << std::endl;
+                return false;
+            }
+
+            if (hasFINX) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_FINX << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_FINX << "' =" << goal.x << "will be used." << std::endl;
+            }
+            else {
+                if (!(stream >> goal.x && goal.x >= 0 && goal.x < width)) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_FINX
+                              << "' tag encountered (or could not convert to integer)" << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_FINX << "' tag should be an integer AND >=0 AND < '"
+                              << CNS_TAG_WIDTH << "' value, which is " << width << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_FINX
+                              << "' tag will be encountered later..." << std::endl;
+                }
+                else
+                    hasFINX = true;
+            }
+        }
+        else if (value == CNS_TAG_FINY) {
+            if (!hasHeight) {
+                std::cout << "Error! '" << CNS_TAG_FINY << "' tag encountered before '" << CNS_TAG_HEIGHT << "' tag."
+                          << std::endl;
+                return false;
+            }
+
+            if (hasFINY) {
+                std::cout << "Warning! Duplicate '" << CNS_TAG_FINY << "' encountered." << std::endl;
+                std::cout << "Only first value of '" << CNS_TAG_FINY << "' =" << goal.y << "will be used." << std::endl;
+            }
+            else {
+                if (!(stream >> goal.y && goal.y >= 0 && goal.y < height)) {
+                    std::cout << "Warning! Invalid value of '" << CNS_TAG_FINY
+                              << "' tag encountered (or could not convert to integer)" << std::endl;
+                    std::cout << "Value of '" << CNS_TAG_FINY << "' tag should be an integer AND >=0 AND < '"
+                              << CNS_TAG_HEIGHT << "' value, which is " << height << std::endl;
+                    std::cout << "Continue reading XML and hope correct value of '" << CNS_TAG_FINY
+                              << "' tag will be encountered later..." << std::endl;
+                }
+                else
+                    hasFINY = true;
+            }
+        }
+        else if (value == CNS_TAG_GRID) {
+            hasGrid = true;
+            if (!(hasHeight && hasWidth)) {
+                std::cout << "Error! No '" << CNS_TAG_WIDTH << "' tag or '" << CNS_TAG_HEIGHT << "' tag before '"
+                          << CNS_TAG_GRID << "'tag encountered!" << std::endl;
+                return false;
+            }
+            element = mapnode->FirstChildElement();
+            while (grid_i < height) {
+                if (!element) {
+                    std::cout << "Error! Not enough '" << CNS_TAG_ROW << "' tags inside '" << CNS_TAG_GRID << "' tag."
+                              << std::endl;
+                    std::cout << "Number of '" << CNS_TAG_ROW
+                              << "' tags should be equal (or greater) than the value of '" << CNS_TAG_HEIGHT
+                              << "' tag which is " << height << std::endl;
+                    return false;
+                }
+                std::string str = element->GetText();
+                std::vector<std::string> elems;
+                std::stringstream ss(str);
+                std::string item;
+                while (std::getline(ss, item, ' '))
+                    elems.push_back(item);
+                rowiter = grid_j = 0;
+                int val;
+                if (elems.size() > 0)
+                    for (grid_j = 0; grid_j < width; ++grid_j) {
+                        if (grid_j == elems.size())
+                            break;
+                        stream.str("");
+                        stream.clear();
+                        stream << elems[grid_j];
+                        stream >> val;
+                        Grid[grid_i][grid_j] = val;
+                    }
+
+                if (grid_j != width) {
+                    std::cout << "Invalid value on " << CNS_TAG_GRID << " in the " << grid_i + 1 << " " << CNS_TAG_ROW
+                              << std::endl;
+                    return false;
+                }
+                ++grid_i;
+
+                element = element->NextSiblingElement();
+            }
         }
     }
-    catch (const char * exc) {
-        std::cout << exc << std::endl;
-        exit(0);
+    //some additional checks
+    if (!hasGrid) {
+        std::cout << "Error! There is no tag 'grid' in xml-file!\n";
+        return false;
     }
-    filename = name;
-    TiXmlElement *root = doc.FirstChildElement(CNS_ROOT);
-    if(root) {
-        TiXmlElement *map = root->FirstChildElement(CNS_MAP);
-        if(map) {
-            TiXmlElement *twidth = map->FirstChildElement(CNS_WIDTH);
-            if(twidth) {
-                const char *width_value = twidth->GetText();
-                width =  convert_to_int(width_value);
-            } else exit_error(CNS_WIDTH);
-            TiXmlElement *theight = map->FirstChildElement(CNS_HEIGHT);
-            if(theight) {
-                const char *height_value = theight->GetText();
-                height =  convert_to_int(height_value);
-            } else exit_error(CNS_WIDTH);
-            TiXmlElement *cellsize = map->FirstChildElement(CNS_CELLSIZE);
-            if(cellsize) {
-                const char *cellsize_value = cellsize->GetText();
-                CellSize =  convert_to_int(cellsize_value);
-            } else {
-                warning(CNS_CELLSIZE);
-                CellSize = 1;
-            }
-            TiXmlElement *startx = map->FirstChildElement(CNS_STARTX);
-            if(startx) {
-                const char *startx_value = startx->GetText();
-                start.x = convert_to_int(startx_value);
-            } else {
-                warning(CNS_STARTX);
-                start.x = 0;
-            }
-            TiXmlElement *starty = map->FirstChildElement(CNS_STARTY);
-            if(starty) {
-                const char *starty_value = starty->GetText();
-                start.y = convert_to_int(starty_value);
-            } else {
-                warning(CNS_STARTY);
-                start.y = 0;
-            }
-            TiXmlElement *finishx = map->FirstChildElement(CNS_FINISHX);
-            if(finishx) {
-                const char *finishx_value = finishx->GetText();
-                goal.x =  convert_to_int(finishx_value);
-            } else {
-                warning(CNS_FINISHX);
-                goal.x = 0;
-            }
-            TiXmlElement *finishy = map->FirstChildElement(CNS_FINISHY);
-            if(finishy) {
-                const char *finishy_value = finishy->GetText();
-                goal.y =  convert_to_int(finishy_value);
-            } else {
-                warning(CNS_FINISHY);
-                goal.y = 0;
-            }
-            BuildGrid();
-            TiXmlElement *g = map->FirstChildElement(CNS_GRID);
-            if(g) {
-                int i = 0;
-                TiXmlElement *row = g->FirstChildElement(CNS_ROW);
-                if (row) {
-                    for (row; row; row = row->NextSiblingElement(CNS_ROW)) {
-                        const char *number = row->Attribute(CNS_NUMBER);
-                        if (number) i = convert_to_int(number);
-                        const char *rowvalue = row->GetText();
-                        int count = 0;
-                        for (int j = 0; j < width; ++j) {
-                            int elem = rowvalue[count] - '0';
-                            Grid[i][j] = elem;
-                            count += 2;
-                        }
-                        ++i;
-                        if (i > height) {
-                            std::cout << "ERROR: the size of map does not match parametr" << std::endl;
-                            exit(0);
-                        }
-                    }
-                    if (i < height) {
-                        std::cout << "ERROR: the size of map does not match parametr" << std::endl;
-                        exit(0);
-                    }
-                }
-            } else exit_error(CNS_GRID);
-            std::cout << "Reading map sucsses" << std::endl;
-        } else exit_error(CNS_MAP);
-        TiXmlElement *algorithm = root->FirstChildElement(CNS_ALGORITHM);
-        if (algorithm) {
-            TiXmlElement *searchtype = algorithm->FirstChildElement(CNS_SEARCHTYPE);
-            if (searchtype) {
-                algorithm_info.searchtype = get_info(searchtype);
-            } else exit_error(CNS_SEARCHTYPE);
-            TiXmlElement * metrictype = algorithm->FirstChildElement(CNS_METRICTYPE);
-            if (metrictype) {
-                algorithm_info.metrictype = get_info(metrictype);
-            } else warning(CNS_METRICTYPE);
-            TiXmlElement * hweight = algorithm->FirstChildElement(CNS_HWEIGHT);
-            if (hweight) {
-                const char *hweight_value = hweight->GetText();
-                algorithm_info.hweight = convert_to_double(hweight_value);
-            } else {
-                warning(CNS_HWEIGHT);
-                algorithm_info.hweight = 1;
-            }
-            TiXmlElement * breakingties = algorithm->FirstChildElement(CNS_BREAK);
-            if (breakingties) {
-                algorithm_info.breakingties = get_info(breakingties);
-            } else warning(CNS_BREAK);
-            TiXmlElement * linecost = algorithm->FirstChildElement(CNS_LINE);
-            if (linecost) {
-                const char *linecost_value = linecost->GetText();
-                algorithm_info.linecost = convert_to_double(linecost_value);
-            } else {
-                warning(CNS_LINE);
-                algorithm_info.linecost = 1;
-            }
-            TiXmlElement * diagonalcost = algorithm->FirstChildElement(CNS_DIAGONAL);
-            if (diagonalcost) {
-                const char *diagonal_value = diagonalcost->GetText();
-                algorithm_info.diagonalcost = convert_to_double(diagonal_value);
-            } else {
-                warning(CNS_DIAGONAL);
-                algorithm_info.diagonalcost = sqrt(2);
-            }
+    if (!(hasFINX && hasFINY && hasSTX && hasSTY))
+        return false;
 
-            TiXmlElement * allowdiagonal = algorithm->FirstChildElement(CNS_ALLOW);
-            if (allowdiagonal) {
-                const char *allowdiag_value = allowdiagonal->GetText();
-                if (strstr(allowdiag_value, "true") != nullptr
-                        || strstr(allowdiag_value, "1") != nullptr) {
-                    algorithm_info.allowdiagonal = true;
-                }
-                else algorithm_info.allowdiagonal = false;
-            } else {
-                warning(CNS_ALLOW);
-                algorithm_info.allowdiagonal = false;
-            }
-            TiXmlElement * allowsqueeze = algorithm->FirstChildElement(CNS_ALLOWS);
-            if (allowsqueeze) {
-                const char *allowsq_value = allowsqueeze->GetText();
-                if(strstr(allowsq_value,"true") != nullptr
-                        || strstr(allowsq_value,"1") != nullptr) algorithm_info.allowsqueeze = true;
-                else algorithm_info.allowsqueeze = false;
-            } else {
-                warning(CNS_ALLOWS);
-                algorithm_info.allowsqueeze = false;
-            }
-            TiXmlElement *cutcorners = algorithm->FirstChildElement(CNS_CUTCORNERS);
-            if (cutcorners) {
-                const char *cut_value = cutcorners->GetText();
-                if(strstr(cut_value,"true") != nullptr
-                        || strstr(cut_value, "1") != nullptr) algorithm_info.cutcorners = true;
-                else algorithm_info.cutcorners = false;
-            } else {
-                warning(CNS_CUTCORNERS);
-                algorithm_info.cutcorners = false;
-            }
-        }
+    if (Grid[start.y][start.x] != CN_GC_NOOBS) {
+        std::cout << "Error! Start cell is not traversable (cell's value is" << Grid[start.y][start.x] << ")!"
+                  << std::endl;
+        return false;
+    }
 
-        TiXmlElement *options = root->FirstChildElement(CNS_OPTIONS);
-        if(options) {
+    if (Grid[goal.y][goal.x] != CN_GC_NOOBS) {
+        std::cout << "Error! Goal cell is not traversable (cell's value is" << Grid[goal.y][goal.x] << ")!"
+                  << std::endl;
+        return false;
+    }
 
-            TiXmlElement *loglevel = options->FirstChildElement(CNS_LOGLEVEL);
-            if (loglevel) {
-                algorithm_info.loglevel = convert_to_double(get_info(loglevel));
-            }
-
-            TiXmlElement *logpath = options->FirstChildElement(CNS_LOGPATH);
-            if (logpath) {
-                if(logpath->GetText()) algorithm_info.logpath = convert_to_string(get_info(logpath));
-            }
-
-            TiXmlElement *logfilename = options->FirstChildElement(CNS_LOGFILENAME);
-            if (logfilename && logfilename->GetText()) {
-                algorithm_info.logfilename = convert_to_char(get_info(logfilename));
-            } else {
-                std::cout << "WARNING: Not foung tag '" << CNS_LOGFILENAME <<  "'. Using default value." << std::endl;
-                std::stringstream ss;
-                ss << name;
-                std::string file_name = ss.str();
-                if(file_name.rfind(".")) {
-                    file_name.replace(file_name.rfind("."), 1, "_log.");
-                } else {
-                    file_name += "_log.xml";
-                }
-                algorithm_info.logfilename = file_name;
-            }
-        }
-    } else exit_error(CNS_ROOT);
+    return true;
 }

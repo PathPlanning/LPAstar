@@ -2,7 +2,6 @@
 #define STRUCTURES
 
 #include "node.h"
-#include "parser.h"
 #include <cmath>
 #include <vector>
 #include <functional>
@@ -10,6 +9,10 @@
 #include <iostream>
 #include <chrono>
 
+struct Changes {
+    std::list<Cell> occupied;
+    std::list<Cell> cleared;
+};
 
 struct Section {
     Node start;

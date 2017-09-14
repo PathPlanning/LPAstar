@@ -35,8 +35,8 @@
         <metrictype>euclid</metrictype>
         <breakingties>g-max</breakingties>
         <allowdiagonal>1</allowdiagonal>
-        <allowsqueeze>false</allowsqueeze>
-        <cutcorners>true</cutcorners>
+        <allowsqueeze>1</allowsqueeze>
+        <cutcorners>1</cutcorners>
     </algorithm>
     <options>
         <loglevel>1</loglevel>
