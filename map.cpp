@@ -90,7 +90,7 @@ Changes Map::DamageTheMap(std::list<Node> path)
     std::uniform_int_distribution<int> uni(3, path.size() - 3); // guaranteed unbiased
 
     auto random_number = uni(rng);
-    random_number = 4;
+    //random_number = 4;
     int i = 0;
     Node crash = path.front();
     auto it = path.begin();
