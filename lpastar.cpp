@@ -60,11 +60,20 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
                 //std::cout << "n: " << neighbor->point << std::endl;
                 if (!(neighbor->point == map.start) && (neighbor->parent->point == dam || CutOrSqueeze(neighbor, d))) {
                     Node min_val = GetMinPredecessor(neighbor, map);
-                    neighbor->rhs = min_val.rhs;
-                    neighbor->parent = min_val.parent;
-                    //std::cout << "changed: "
-                    //          << neighbor->point << ' ' << neighbor->parent->point << std::endl;
-                    UpdateVertex(neighbor, map);
+                    if (!min_val.parent) {
+                        OPEN.remove_if(neighbor);
+                        if(neighbor->point == goal->point) {
+                            current_result.pathfound = false;
+                            current_result.pathlength = 0;
+                            return current_result;
+                        }
+                    } else {
+                        neighbor->rhs = min_val.rhs;
+                        neighbor->parent = min_val.parent;
+                        //std::cout << "changed: "
+                        //          << neighbor->point << ' ' << neighbor->parent->point << std::endl;
+                        UpdateVertex(neighbor, map);
+                    }
                 }
             }
         }
@@ -123,7 +132,7 @@ void LPAstar::UpdateVertex(Node* u, Map &map)
 
 bool LPAstar::ComputeShortestPath(Map &map)
 {
-    while (!OPEN.empty() && OPEN.top_key_less_than(CalculateKey(*goal, map)) || goal->rhs != goal->g) {
+    while (OPEN.top_key_less_than(CalculateKey(*goal, map)) || goal->rhs != goal->g) {
         ++number_of_steps;
         Node* current = OPEN.get();
         if (current->g > current->rhs) {
@@ -153,7 +162,7 @@ bool LPAstar::ComputeShortestPath(Map &map)
         /*if(current->parent) {
             std::cout << current->point << "g " << current->g << " rhs" << current->rhs <<
                   current->parent->point << std::endl;
-        }*/       //std::cout << OPEN.top_key().k1 << std::endl;
+        } */     //std::cout << OPEN.top_key().k1 << std::endl;
         //OPEN.print_elements();
 
     }
@@ -188,15 +197,19 @@ Node LPAstar::GetMinPredecessor(Node* current, Map &map) {
         }
     }
     Node min_node;
-    min = (all_neighbors.front());
-    min_node = *min;
-    min_node.rhs = std::numeric_limits<double>::infinity();
-    min_node.parent = min;
-    for (auto n: all_neighbors) {
-        if (min_node.rhs > n->g + GetCost(n->point, current->point, map)) {
-            min_node.rhs = n->g + GetCost(n->point, current->point, map);
-            min_node.parent = n;
+    if (!all_neighbors.empty()) {
+        min = (all_neighbors.front());
+        min_node = *min;
+        min_node.rhs = std::numeric_limits<double>::infinity();
+        min_node.parent = min;
+        for (auto n: all_neighbors) {
+            if (min_node.rhs > n->g + GetCost(n->point, current->point, map)) {
+                min_node.rhs = n->g + GetCost(n->point, current->point, map);
+                min_node.parent = n;
+            }
         }
+    } else {
+        min_node.parent = nullptr;
     }
     return min_node;
 }

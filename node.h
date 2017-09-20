@@ -19,6 +19,9 @@ struct Cell {
     inline bool operator==(const Cell& p) const {
         return x == p.x && y == p.y;
     }
+    inline bool operator!=(const Cell& p) const {
+        return !(*this == p);
+    }
     inline bool operator<(const Cell& p) const {
         return y < p.y || (y == p.y && x < p.x);
     }

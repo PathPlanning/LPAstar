@@ -14,7 +14,7 @@ public:
 
     void saveLog();
 
-    void writeToLogMap(const Map &Map, const std::list<Node> &path);
+    void writeToLogMap(const Map &Map, const std::list<Node> &path, bool pathfound);
 
     void writeToLogOpenClose(const std::vector<std::list<ANode>> &open, const std::unordered_map<int, ANode> &close, bool last);
 

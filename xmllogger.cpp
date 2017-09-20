@@ -87,7 +87,7 @@ void XmlLogger::saveLog()
     doc.SaveFile(LogFileName.c_str());
 }
 
-void XmlLogger::writeToLogMap(const Map &map, const std::list<Node> &path)
+void XmlLogger::writeToLogMap(const Map &map, const std::list<Node> &path, bool pathfound)
 {
     if (loglevel == CN_LP_LEVEL_NOPE_WORD || loglevel == CN_LP_LEVEL_TINY_WORD)
         return;
@@ -104,16 +104,21 @@ void XmlLogger::writeToLogMap(const Map &map, const std::list<Node> &path)
 
         for (int j = 0; j < map.width; ++j) {
             inPath = false;
-            for(std::list<Node>::const_iterator it = path.begin(); it != path.end(); it++)
-                if(it->point.y == i && it->point.x == j) {
-                    inPath = true;
-                    break;
-                }
-            if (!inPath)
+            if(pathfound) {
+                for(std::list<Node>::const_iterator it = path.begin(); it != path.end(); it++)
+                    if(it->point.y == i && it->point.x == j) {
+                        inPath = true;
+                        break;
+                    }
+                if (!inPath)
+                    str += std::to_string(map[i][j]);
+                else
+                    str += CNS_OTHER_PATHSELECTION;
+                str += CNS_OTHER_MATRIXSEPARATOR;
+            } else {
                 str += std::to_string(map[i][j]);
-            else
-                str += CNS_OTHER_PATHSELECTION;
-            str += CNS_OTHER_MATRIXSEPARATOR;
+                str += CNS_OTHER_MATRIXSEPARATOR;
+            }
         }
 
         element->InsertEndChild(doc.NewText(str.c_str()));

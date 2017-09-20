@@ -69,14 +69,17 @@ public:
         return best_key;
     }
     inline  bool top_key_less_than(Key cur_key) {
+        bool exists = false;
         Key best_key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
         for (size_t i = 0; i < elements.size(); i++) {
             if (!elements[i].empty()) {
+                exists = true;
                 if (elements[i].front()->key < best_key) {
                     best_key = elements[i].front()->key;
                 }
             }
         }
+        if(!exists) return false;
         return best_key < cur_key;
     }
 

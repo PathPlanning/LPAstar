@@ -98,9 +98,11 @@ void Mission::saveSearchResultsToLog()
     if (lparesult.pathfound) {
         logger->writeToLogPath(*lparesult.lppath);
         logger->writeToLogHPpath(*lparesult.hppath);
-        logger->writeToLogMap(map, *lparesult.lppath);
-    } else
+        logger->writeToLogMap(map, *lparesult.lppath, true);
+    } else {
+        logger->writeToLogMap(map, *lparesult.lppath, false);
         logger->writeToLogNotFound();
+    }
     logger->saveLog();
 }
 

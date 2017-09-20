@@ -90,7 +90,7 @@ Changes Map::DamageTheMap(std::list<Node> path)
     std::uniform_int_distribution<int> uni(3, path.size() - 3); // guaranteed unbiased
 
     auto random_number = uni(rng);
-    //random_number = 4;
+    //random_number = path.size() - 2;
     int i = 0;
     Node crash = path.front();
     auto it = path.begin();
@@ -105,12 +105,53 @@ Changes Map::DamageTheMap(std::list<Node> path)
     int y = crash.point.y;
     for (int k = y - 1; k <= y + 1; ++k) {
         for (int l = x - 1; l <= x + 1; ++l) {
-            if (CellIsTraversable(Cell(l, k))) {
+            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
                 result.occupied.push_back(Cell(l, k));
                 Grid[k][l] = CN_GC_OBS;
             }
         }
     }
+
+    x = crash.point.x + 1;
+    y = crash.point.y - 1;
+    for (int k = y - 1; k <= y + 1; ++k) {
+        for (int l = x - 1; l <= x + 1; ++l) {
+            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
+                result.occupied.push_back(Cell(l, k));
+                Grid[k][l] = CN_GC_OBS;
+            }
+        }
+    }
+    /*x = crash.point.x - 1;
+    y = crash.point.y + 1;
+    for (int k = y - 1; k <= y + 1; ++k) {
+        for (int l = x - 1; l <= x + 1; ++l) {
+            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
+                result.occupied.push_back(Cell(l, k));
+                Grid[k][l] = CN_GC_OBS;
+            }
+        }
+    }
+    x = crash.point.x + 1;
+    y = crash.point.y + 1;
+    for (int k = y - 1; k <= y + 1; ++k) {
+        for (int l = x - 1; l <= x + 1; ++l) {
+            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
+                result.occupied.push_back(Cell(l, k));
+                Grid[k][l] = CN_GC_OBS;
+            }
+        }
+    }
+    x = crash.point.x - 1;
+    y = crash.point.y - 1;
+    for (int k = y - 1; k <= y + 1; ++k) {
+        for (int l = x - 1; l <= x + 1; ++l) {
+            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
+                result.occupied.push_back(Cell(l, k));
+                Grid[k][l] = CN_GC_OBS;
+            }
+        }
+    }*/
     /*for (size_t i = 0; i < height; ++i) {
         for (size_t j = 0; j < width; ++j) {
             std::cout << Grid[i][j] << " ";
