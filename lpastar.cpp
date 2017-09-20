@@ -27,11 +27,12 @@ double LPAstar::GetCost(Cell from, Cell to, Map &map) const {
 }
 
 Key LPAstar::CalculateKey(const Node& vertex, Map &map) {
-    Key res(std::min(vertex.g, vertex.rhs + heuristic(vertex.point, map.goal, map)), std::min(vertex.g, vertex.rhs));
+    Key res(std::min(vertex.g, vertex.rhs + hweight * heuristic(vertex.point, map.goal, map)), std::min(vertex.g, vertex.rhs));
     return res;
 }
 
 LPAstar::LPAstar() {}
+LPAstar::LPAstar(double HW) { hweight = HW; }
 LPAstar::~LPAstar()
 {
     if (!NODES.empty()) NODES.erase(NODES.begin(), NODES.end());
@@ -77,6 +78,53 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
                 }
             }
         }
+    }
+    if(ComputeShortestPath(map)){
+        std::cout << "ALL OK\n";
+    } else
+        std::cout << "NOT OK\n";
+    changes = map.ClearTheMap(changes.occupied);
+
+
+   for (auto cleared : changes.cleared) {
+       Node new_node(cleared);
+       new_node.rhs = std::numeric_limits<double>::infinity();
+       new_node.g = std::numeric_limits<double>::infinity();
+       NODES[vertex(cleared, map.height)] = new_node;
+       Node * cl = &(NODES.find(vertex(cleared, map.height))->second);
+       Node min_val = GetMinPredecessor(cl, map);
+       if (min_val.parent) {
+           cl->rhs = min_val.rhs;
+           cl->parent = min_val.parent;
+           cl->g = min_val.parent->g + GetCost(cl->point, min_val.parent->point, map);
+           UpdateVertex(cl, map);
+       } else {
+           break;
+       }
+       for (auto neighbor : GetSuccessors(cl, map)) {
+           if (neighbor->rhs > cl->g + GetCost(neighbor->point, cl->point, map)) {
+               neighbor->parent = cl;
+               neighbor->rhs = cl->g + GetCost(neighbor->point, cl->point, map);
+               UpdateVertex(neighbor, map);
+           }
+           if (neighbor->point.x == cl->point.x || neighbor->point.y == cl->point.y) {
+               Node min_val = GetMinPredecessor(neighbor, map);
+               if (!min_val.parent) {
+                   OPEN.remove_if(neighbor);
+                   if(neighbor->point == goal->point) {
+                       current_result.pathfound = false;
+                       current_result.pathlength = 0;
+                       return current_result;
+                   }
+               } else {
+                   neighbor->rhs = min_val.rhs;
+                   neighbor->parent = min_val.parent;
+                   //std::cout << "changed: "
+                   //          << neighbor->point << ' ' << neighbor->parent->point << std::endl;
+                   UpdateVertex(neighbor, map);
+               }
+           }
+       }
     }
     if(ComputeShortestPath(map)){
         std::cout << "ALL OK\n";
@@ -176,7 +224,7 @@ bool LPAstar::ComputeShortestPath(Map &map)
         std::cout << goal->g << std::endl;
         MakePrimaryPath(goal);
         current_result.lppath = &path;
-        //map.PrintPath(path);
+        map.PrintPath(path);
         return true;
     } else {
         current_result.pathfound = false;

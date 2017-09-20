@@ -21,6 +21,7 @@ class Map
         ~Map();
 
         Changes DamageTheMap(std::list<Node> path);
+        Changes ClearTheMap(std::list<Cell> damaged);
         bool GetMap(const char *name);
         bool CellIsTraversable (Cell curr) const;
         bool CellOnGrid (Cell curr) const;
@@ -47,6 +48,7 @@ class Map
         int **  Grid;
 
         void BuildGrid();
+        Cell damaged;
 
         std::string filename;
 

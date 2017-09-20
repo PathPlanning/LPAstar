@@ -57,7 +57,7 @@ void Mission::createEnvironmentOptions()
 
 void Mission::createSearch()
 {
-    lpasearch = LPAstar();
+    lpasearch = LPAstar(config.SearchParams[CN_SP_HW]);
     search = Astar(config.SearchParams[CN_SP_HW], config.SearchParams[CN_SP_BT]);
 }
 

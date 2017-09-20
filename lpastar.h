@@ -14,6 +14,7 @@ class LPAstar
 {
 public:
     LPAstar();
+    LPAstar(double HW);
     ~LPAstar(void);
 
     LPASearchResult FindThePath(Map &map, EnvironmentOptions options);
@@ -24,6 +25,7 @@ private:
     Node *start;
     Node *goal;
     int number_of_steps;
+    double hweight;
 
     EnvironmentOptions opt;
     std::list<Node> path;

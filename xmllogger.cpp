@@ -272,7 +272,10 @@ void XmlLogger::writeToLogSummary(unsigned int numberofsteps, unsigned int nodes
     element->SetAttribute(CNS_TAG_ATTR_TIME, std::to_string(time).c_str());
 
     element->SetAttribute(CNS_TAG_ATTR_ALENGTH, alength);
-    element->SetAttribute(CNS_TAG_ATTR_ACORRECT, acorrect);
+    if (acorrect)
+        element->SetAttribute(CNS_TAG_ATTR_ACORRECT, 1);
+    else
+        element->SetAttribute(CNS_TAG_ATTR_ACORRECT, 0);
 }
 
 void XmlLogger::writeToLogNotFound()

@@ -101,8 +101,10 @@ Changes Map::DamageTheMap(std::list<Node> path)
         }
         ++it;
     }
+
     int x = crash.point.x;
     int y = crash.point.y;
+    damaged = Cell(x,y);
     for (int k = y - 1; k <= y + 1; ++k) {
         for (int l = x - 1; l <= x + 1; ++l) {
             if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
@@ -158,6 +160,24 @@ Changes Map::DamageTheMap(std::list<Node> path)
         }
         std::cout << std::endl;
     }*/
+
+    /*Grid[6][5] = CN_GC_NOOBS;
+    Grid[7][5] = CN_GC_NOOBS;
+    Grid[8][5] = CN_GC_NOOBS;
+    result.cleared.push_back(Cell(5, 6));
+    result.cleared.push_back(Cell(5, 7));
+    result.cleared.push_back(Cell(5, 8));
+    */
+    return result;
+}
+Changes Map::ClearTheMap(std::list<Cell> damaged)
+{
+    Changes result;
+    //random_number = path.size() - 2;
+    for (auto elem : damaged) {
+        result.cleared.push_back(elem);
+        Grid[elem.y][elem.x] = CN_GC_NOOBS;
+    }
     return result;
 }
 
