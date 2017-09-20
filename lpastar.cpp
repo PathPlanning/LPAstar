@@ -84,8 +84,10 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
         std::cout << "NOT OK\n";
     end = std::chrono::system_clock::now();
     current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
-    makeSecondaryPath();
-    current_result.hppath = &hpath;
+    if (current_result.pathfound) {
+        makeSecondaryPath();
+        current_result.hppath = &hpath;
+    }
     //for (auto elem: path) std::cout << elem->point << " ";
     //std::cout << std::endl;
     return current_result;
