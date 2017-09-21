@@ -224,7 +224,7 @@ bool LPAstar::ComputeShortestPath(Map &map)
         std::cout << goal->g << std::endl;
         MakePrimaryPath(goal);
         current_result.lppath = &path;
-        map.PrintPath(path);
+        //map.PrintPath(path);
         return true;
     } else {
         current_result.pathfound = false;
