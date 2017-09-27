@@ -48,37 +48,29 @@ For more detailed information there are some samples in the [samples](https://bi
 
 Both files are an XML file with a specific structure. 
 Input file should contain:
-<ul>
-<li>Mandatory tag `<map>`. It describes the environment.</li>
-  <ul>
-  <li> `<height>` and `<width>` - mandatory tags that define size of the map. Origin is in the upper left corner. (0,0) - is upper left, (*width*-1, *height*-1) is lower right.</li>
-  <li> `<startx>` and `<starty>` - mandatory tags that define horizontal (X) and vertical (Y) offset of the start location from the upper left corner. Legal values for *startx* are [0, .., *width*-1], for *starty* - [0, .., *height*-1].</li>
-  <li> `<finishx>` and `<finishy>` - mandatory tags that horizontal (X) and vertical (Y) offset of the goal location.</li>
-  <li> `<grid>` - mandatory tag that describes the square grid constituting the map. It consists of `<row>` tags. Each `<row>` contains a sequence of "0" and "1" separated by blanks. "0" stands for traversable cell, "1" - for untraversable (actually any other figure but "0" can be used instead of "1").</li>
-  <li> `<cellsize>` - optional tag that defines the size of one cell. One might add it to calculate scaled length of the path.</li>
-  <li> `<title>`, `<URL>`, `<coordinates>`, etc - optional tags containing additional information on the map.</li>
-  </ul>
-<li> Mandatory tag `<algorithm>`. It describes the parameters of the algorithm.</li>
-  <ul>
-  <li> `<metrictype>` - defines the type of metric for heuristic function. Possible values - "euclidean", "diagonal", "manhattan", "chebyshev". Default value is "euclidean".</li>
-  <li>`<hweight>` - defines the weight of heuristic function. Default value is "1".</li>
-  <li> `<breakingties>` - used only by A\* and defines the priority in OPEN list when nodes have the equal F-values. Possible values - "g-min", "g-max". Default value is "g-max".</li>
-  <li> `<allowdiagonal>` - boolean tag that defines the possibility to make diagonal moves. Setting it to "false" restricts agent to make cardinal (horizonal, vertical) moves only. Default value is "true".</li>
-  <li> `<cutcorners>` - boolean tag that defines the possibilty to make diagonal moves when one adjacent cell is untraversable. The tag is ignored if diagonal moves are not allowed. Default value is "false".</li>
-  <li> `<allowsqueeze>` - boolean tag that defines the possibility to make diagonal moves when both adjacent cells are untraversable. The tag is ignored if cutting corners is not allowed. Default value is "false".</li>
-  </ul>
-<li> Optional tag `<options>`. Options that are not related to search.</li>
-  <ul>
-  <li> `<loglevel>` - defines the level of detalization of log-file. Default value is "1". Possible values:</li>
-    <ul>
-    <li> "0" or "none" - log-file is not created.</li>
-    <li> "0.5" or "tiny" - All the input data is copied to the log-file plus short `<summary>` is appended. `<summary>` contains info of the path length, number of steps, elapsed time, etc.</li>
-    <li> "1" or "short" - *0.5*-log plus `<path>` is appended. It looks like `<grid>` but cells forming the path are marked by "\*" instead of "0". The following tags are also appended: `<hplevel>` and `<lplevel>`. `<lplevel>` is the sequence of coordinates of cells forming the path. `<hplevel>` is the sequence of sections forming the path.</li>
-    </ul>
-  <li> `<logpath>` - defines the directory where the log-file should be written. If not specified directory of the input file is used. </li>
-  <li> `<logname>` - defines the name of log-file. If not specified the name of the log file is: "input file name"+"_log"+input file extension.</li>
-  </ul>
-</ul>
+
++ Mandatory tag `<map>`. It describes the environment.
+  * `<height>` and `<width>` - mandatory tags that define size of the map. Origin is in the upper left corner. (0,0) - is upper left, (*width*-1, *height*-1) is lower right.
+  * `<startx>` and `<starty>` - mandatory tags that define horizontal (X) and vertical (Y) offset of the start location from the upper left corner. Legal values for *startx* are [0, .., *width*-1], for *starty* - [0, .., *height*-1].
+  * `<finishx>` and `<finishy>` - mandatory tags that horizontal (X) and vertical (Y) offset of the goal location.
+  * `<grid>` - mandatory tag that describes the square grid constituting the map. It consists of `<row>` tags. Each `<row>` contains a sequence of "0" and "1" separated by blanks. "0" stands for traversable cell, "1" - for untraversable (actually any other figure but "0" can be used instead of "1").
+  * `<cellsize>` - optional tag that defines the size of one cell. One might add it to calculate scaled length of the path.
+  * `<title>`, `<URL>`, `<coordinates>`, etc - optional tags containing additional information on the map.
++ Mandatory tag `<algorithm>`. It describes the parameters of the algorithm.
+  * `<metrictype>` - defines the type of metric for heuristic function. Possible values - "euclidean", "diagonal", "manhattan", "chebyshev". Default value is "euclidean".
+  * `<hweight>` - defines the weight of heuristic function. Default value is "1".
+  * `<breakingties>` - used only by A\* and defines the priority in OPEN list when nodes have the equal F-values. Possible values - "g-min", "g-max". Default value is "g-max".
+  * `<allowdiagonal>` - boolean tag that defines the possibility to make diagonal moves. Setting it to "false" restricts agent to make cardinal (horizonal, vertical) moves only. Default value is "true".
+  * `<cutcorners>` - boolean tag that defines the possibilty to make diagonal moves when one adjacent cell is untraversable. The tag is ignored if diagonal moves are not allowed. Default value is "false".
+  * `<allowsqueeze>` - boolean tag that defines the possibility to make diagonal moves when both adjacent cells are untraversable. The tag is ignored if cutting corners is not allowed. Default value is "false".
++ Optional tag `<options>`. Options that are not related to search.
+  * `<loglevel>` - defines the level of detalization of log-file. Default value is "1". Possible values:
+    - "0" or "none" - log-file is not created.
+    - "0.5" or "tiny" - All the input data is copied to the log-file plus short `<summary>` is appended. `<summary>` contains info of the path length, number of steps, elapsed time, etc.
+    - "1" or "short" - *0.5*-log plus `<path>` is appended. It looks like `<grid>` but cells forming the path are marked by "\*" instead of "0". The following tags are also appended: `<hplevel>` and `<lplevel>`. `<lplevel>` is the sequence of coordinates of cells forming the path. `<hplevel>` is the sequence of sections forming the path.
+  * `<logpath>` - defines the directory where the log-file should be written. If not specified directory of the input file is used. 
+  * `<logname>` - defines the name of log-file. If not specified the name of the log file is: "input file name"+"_log"+input file extension.
+
 The main tag in Output file, which containes path length, memory and time:  
 ```xml
 <summary numberofsteps="107" nodescreated="127" length="15.414213" length_scaled="41.618375587463383" time="0.000512" astar_length="15.414213" astar_correct="1"/>
