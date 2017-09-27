@@ -82,15 +82,15 @@ void Map::BuildGrid() {
     }
 }
 
+//function that force map to block the path, sufficient for testing
 Changes Map::DamageTheMap(std::list<Node> path)
 {
     Changes result;
-    std::random_device rd;     // only used once to initialise (seed) engine
-    std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-    std::uniform_int_distribution<int> uni(3, path.size() - 3); // guaranteed unbiased
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> uni(3, path.size() - 3);
 
-    auto random_number = uni(rng);
-    //random_number = path.size() - 2;
+    auto random_number = uni(rng); //create random number to damage random part of the path
     int i = 0;
     Node crash = path.front();
     auto it = path.begin();
@@ -124,56 +124,13 @@ Changes Map::DamageTheMap(std::list<Node> path)
             }
         }
     }
-    /*x = crash.point.x - 1;
-    y = crash.point.y + 1;
-    for (int k = y - 1; k <= y + 1; ++k) {
-        for (int l = x - 1; l <= x + 1; ++l) {
-            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
-                result.occupied.push_back(Cell(l, k));
-                Grid[k][l] = CN_GC_OBS;
-            }
-        }
-    }
-    x = crash.point.x + 1;
-    y = crash.point.y + 1;
-    for (int k = y - 1; k <= y + 1; ++k) {
-        for (int l = x - 1; l <= x + 1; ++l) {
-            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
-                result.occupied.push_back(Cell(l, k));
-                Grid[k][l] = CN_GC_OBS;
-            }
-        }
-    }
-    x = crash.point.x - 1;
-    y = crash.point.y - 1;
-    for (int k = y - 1; k <= y + 1; ++k) {
-        for (int l = x - 1; l <= x + 1; ++l) {
-            if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
-                result.occupied.push_back(Cell(l, k));
-                Grid[k][l] = CN_GC_OBS;
-            }
-        }
-    }*/
-    /*for (size_t i = 0; i < height; ++i) {
-        for (size_t j = 0; j < width; ++j) {
-            std::cout << Grid[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }*/
-
-    /*Grid[6][5] = CN_GC_NOOBS;
-    Grid[7][5] = CN_GC_NOOBS;
-    Grid[8][5] = CN_GC_NOOBS;
-    result.cleared.push_back(Cell(5, 6));
-    result.cleared.push_back(Cell(5, 7));
-    result.cleared.push_back(Cell(5, 8));
-    */
     return result;
 }
+
+//function forces map to clear the damage, sufficient for testing
 Changes Map::ClearTheMap(std::list<Cell> damaged)
 {
     Changes result;
-    //random_number = path.size() - 2;
     for (auto elem : damaged) {
         result.cleared.push_back(elem);
         Grid[elem.y][elem.x] = CN_GC_NOOBS;

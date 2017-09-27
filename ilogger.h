@@ -1,7 +1,6 @@
 #ifndef ILOGGER_H
 #define	ILOGGER_H
 #include "map.h"
-#include <node.h>
 #include <unordered_map>
 #include <list>
 

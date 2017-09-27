@@ -1,5 +1,11 @@
 #include "lpastar.h"
 
+LPAstar::LPAstar() {}
+LPAstar::LPAstar(double HW) { hweight = HW; }
+LPAstar::~LPAstar()
+{
+    if (!NODES.empty()) NODES.erase(NODES.begin(), NODES.end());
+}
 
 inline int vertex(Cell item, int size) {
     return item.x * size + item.y;
@@ -31,62 +37,60 @@ Key LPAstar::CalculateKey(const Node& vertex, Map &map) {
     return res;
 }
 
-LPAstar::LPAstar() {}
-LPAstar::LPAstar(double HW) { hweight = HW; }
-LPAstar::~LPAstar()
-{
-    if (!NODES.empty()) NODES.erase(NODES.begin(), NODES.end());
-}
-
+//The main pathbuilding function
 LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
 {
-
     opt = options;
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     number_of_steps = 0;
-    Initialize(map);
+    Initialize(map); //algorithm initialization
 
-    if(!ComputeShortestPath(map))
-        std::cout << "OOOPS\n";
-    else
-        std::cout << "Done\n";
-    std::cout << current_result.pathlength <<std::endl;
-    Changes changes = map.DamageTheMap(path);
-    for (auto dam : changes.occupied) {
+    if(!ComputeShortestPath(map)) {
+        current_result.pathfound = false;
+        current_result.pathlength = 0;
+        end = std::chrono::system_clock::now();
+        current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+        std::cout << "Pathbuilding algoritm's error: THE PATH DOES NOT EXISTS\n";
+        return current_result;
+    }
+    Changes changes = map.DamageTheMap(path); //force map to change (sufficient for the correct testing)
+    for (auto dam : changes.occupied) { //for each damaged (0 -> 1) cell recounting values for it's neighbors
         if (NODES.count(vertex(dam, map.height))) {
             Node* d = &(NODES.find(vertex(dam, map.height))->second);
             OPEN.remove_if(d);
             for (auto neighbor: GetSurroundings(d, map)) {
-                //std::cout << "n: " << neighbor->point << std::endl;
                 if (!(neighbor->point == map.start) && (neighbor->parent->point == dam || CutOrSqueeze(neighbor, d))) {
                     Node min_val = GetMinPredecessor(neighbor, map);
                     if (!min_val.parent) {
                         OPEN.remove_if(neighbor);
-                        if(neighbor->point == goal->point) {
+                        if(neighbor->point == goal->point) { //means that after changes goal point became unreachable
                             current_result.pathfound = false;
                             current_result.pathlength = 0;
+                            end = std::chrono::system_clock::now();
+                            current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+                            std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
                             return current_result;
                         }
                     } else {
                         neighbor->rhs = min_val.rhs;
                         neighbor->parent = min_val.parent;
-                        //std::cout << "changed: "
-                        //          << neighbor->point << ' ' << neighbor->parent->point << std::endl;
                         UpdateVertex(neighbor, map);
                     }
                 }
             }
         }
     }
-    if(ComputeShortestPath(map)){
-        std::cout << "ALL OK\n";
-    } else
-        std::cout << "NOT OK\n";
-    changes = map.ClearTheMap(changes.occupied);
-
-
-   for (auto cleared : changes.cleared) {
+    if(!ComputeShortestPath(map)) {
+        current_result.pathfound = false;
+        current_result.pathlength = 0;
+        end = std::chrono::system_clock::now();
+        current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+        std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
+        return current_result;
+    }
+    changes = map.ClearTheMap(changes.occupied); //force map to change (here: clear all previous damage)
+    for (auto cleared : changes.cleared) { //for each cell, that was cleared (1 -> 0) recounting values for it & it's neighbors
        Node new_node(cleared);
        new_node.rhs = std::numeric_limits<double>::infinity();
        new_node.g = std::numeric_limits<double>::infinity();
@@ -99,7 +103,7 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
            cl->g = min_val.parent->g + GetCost(cl->point, min_val.parent->point, map);
            UpdateVertex(cl, map);
        } else {
-           break;
+           break; //means that this cell is unreachable and there's no need to recount values for it's neighbors
        }
        for (auto neighbor : GetSuccessors(cl, map)) {
            if (neighbor->rhs > cl->g + GetCost(neighbor->point, cl->point, map)) {
@@ -111,33 +115,36 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
                Node min_val = GetMinPredecessor(neighbor, map);
                if (!min_val.parent) {
                    OPEN.remove_if(neighbor);
-                   if(neighbor->point == goal->point) {
+                   if(neighbor->point == goal->point) { //means that goal became unreachable
                        current_result.pathfound = false;
                        current_result.pathlength = 0;
+                       end = std::chrono::system_clock::now();
+                       current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+                       std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
                        return current_result;
                    }
                } else {
                    neighbor->rhs = min_val.rhs;
                    neighbor->parent = min_val.parent;
-                   //std::cout << "changed: "
-                   //          << neighbor->point << ' ' << neighbor->parent->point << std::endl;
                    UpdateVertex(neighbor, map);
                }
            }
        }
     }
-    if(ComputeShortestPath(map)){
-        std::cout << "ALL OK\n";
-    } else
-        std::cout << "NOT OK\n";
+    if(!ComputeShortestPath(map)){
+        current_result.pathfound = false;
+        current_result.pathlength = 0;
+        end = std::chrono::system_clock::now();
+        current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+        std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
+        return current_result;
+    }
     end = std::chrono::system_clock::now();
     current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
     if (current_result.pathfound) {
         makeSecondaryPath();
         current_result.hppath = &hpath;
     }
-    //for (auto elem: path) std::cout << elem->point << " ";
-    //std::cout << std::endl;
     return current_result;
 }
 
@@ -160,40 +167,34 @@ void LPAstar::Initialize(Map &map)
     goal = &(NODES.find(vertex(map.goal, map.height))->second);
 
     OPEN.resize(map.height);
-    OPEN.put(start);
+    OPEN.put(start); //add start cell to OPEN list
 }
 
-void LPAstar::CloseOpen(double height) {
-    for (auto elem : OPEN.get_elements()) {
-        NODES[vertex(elem.point, height)] = elem;
-    }
-}
-
-void LPAstar::UpdateVertex(Node* u, Map &map)
+void LPAstar::UpdateVertex(Node* u, Map &map) //adding and removing vertices from OPEN list
 {
     if (!(u->IsConsistent())) {
         u->key = CalculateKey(*u, map);
-        //std::cout << "key: "<< u->key.k1 << " " << u->key.k2 << " " << u->point << std::endl;
-        OPEN.put(u); //check if it is already there
+        OPEN.put(u); //add vertex u in OPEN list or change it's key if it is already there
     } else {
-        OPEN.remove_if(u);
+        OPEN.remove_if(u); //rif vertex u is in OPEN list, remove it
     }
 }
 
+//the main process of opening vertices and recalculating g- and rhs-values
 bool LPAstar::ComputeShortestPath(Map &map)
 {
     while (OPEN.top_key_less_than(CalculateKey(*goal, map)) || goal->rhs != goal->g) {
         ++number_of_steps;
-        Node* current = OPEN.get();
+        Node* current = OPEN.get(); //returns element from OPEN with smalest key value
         if (current->g > current->rhs) {
             current->g = current->rhs;
             OPEN.pop();
-            for (auto elem : GetSuccessors(current, map)) {
+            for (auto elem : GetSuccessors(current, map)) { //for each successor(neighbor) recalculate it's rhs value
                 if (elem->rhs > current->g + GetCost(elem->point, current->point, map)) {
                     elem->parent = current;
-                    elem->rhs = current->g + GetCost(elem->point, current->point, map);
-                    UpdateVertex(elem, map);
+                    elem->rhs = current->g + GetCost(elem->point, current->point, map); 
                 }
+                UpdateVertex(elem, map);
             }
         } else {
             current->g = std::numeric_limits<double>::infinity();
@@ -204,35 +205,25 @@ bool LPAstar::ComputeShortestPath(Map &map)
                     Node min_val = GetMinPredecessor(elem, map);
                     elem->rhs = min_val.rhs;
                     elem->parent = min_val.parent;
-
                 }
                 UpdateVertex(elem, map);
             }
         }
-        /*if(current->parent) {
-            std::cout << current->point << "g " << current->g << " rhs" << current->rhs <<
-                  current->parent->point << std::endl;
-        } */     //std::cout << OPEN.top_key().k1 << std::endl;
-        //OPEN.print_elements();
-
     }
-    if (goal->g != std::numeric_limits<double>::infinity()) {
+    if (goal->g != std::numeric_limits<double>::infinity()) { //if path exists
         current_result.pathfound = true;
         current_result.numberofsteps = number_of_steps;
         current_result.nodescreated = NODES.size();
         current_result.pathlength = goal->g;
-        std::cout << goal->g << std::endl;
-        MakePrimaryPath(goal);
+        MakePrimaryPath(goal); //build path from parent pointers
         current_result.lppath = &path;
         //map.PrintPath(path);
         return true;
-    } else {
-        current_result.pathfound = false;
-        current_result.pathlength = 0;
     }
     return false;
 }
 
+//function returns the best(minimum) cost of getting to the current cell from it's predecessors and pointer to that predecessor
 Node LPAstar::GetMinPredecessor(Node* current, Map &map) {
     Node* min;
     std::vector<Node *> all_neighbors;
@@ -259,11 +250,12 @@ Node LPAstar::GetMinPredecessor(Node* current, Map &map) {
             }
         }
     } else {
-        min_node.parent = nullptr;
+        min_node.parent = nullptr; //means that current vertex is now unreachable
     }
     return min_node;
 }
 
+//function returns Nodes of successors of current vertex. Already with their g- and rhs-values
 std::vector<Node* > LPAstar::GetSuccessors(Node* current, Map &map) {
     std::vector<Node*> result;
     for(auto elem : FindNeighbors(current, map)) {
@@ -279,12 +271,13 @@ std::vector<Node* > LPAstar::GetSuccessors(Node* current, Map &map) {
     return result;
 }
 
+//function returns list of map neighbors to the current node depending on the environmental conditions
 std::list<Node> LPAstar::FindNeighbors(Node* n, Map &map) const {
     Node newNode;
     Cell curNode = n->point;
     std::list<Node> successors;
-    for (int i = -1; i <= +1; i++)
-        for (int j = -1; j <= +1; j++)
+    for (int i = -1; i <= +1; i++) {
+        for (int j = -1; j <= +1; j++) {
             if ((i != 0 || j != 0) && map.CellOnGrid(Cell(curNode.x + j, curNode.y + i)) &&
                     (map.CellIsTraversable(Cell(curNode.x + j, curNode.y + i)))) {
                 if (i != 0 && j != 0) {
@@ -304,28 +297,12 @@ std::list<Node> LPAstar::FindNeighbors(Node* n, Map &map) const {
                 newNode = Node(Cell(curNode.x + j, curNode.y + i), n);
                 successors.push_front(newNode);
             }
-    return successors;
-    /*int x = n->point.x;
-    int y = n->point.y;
-    if(!opt.allowdiagonal) {
-        for (int k = y - 1; k <= y + 1; ++k) {
-            for (int l = x - 1; l <= x + 1; ++l) {
-                if (!(k == y && l == x) && map.CellIsNeighbor(Cell(l, k), n->point)) {
-                    result.push_back(Node(Cell(l, k), n));
-                }
-            }
         }
-    } else {
-        for (int k = x - 1; k <= x + 1; ++k)
-            if (k != x && map.CellOnGrid(Cell(k, y)) && map.CellIsTraversable(Cell(k, y)))
-                result.push_back(Node(Cell(k, y), n));
-        for (int l = y - 1; l <= y + 1; ++l)
-            if (l != y && map.CellOnGrid(Cell(x, l)) && map.CellIsTraversable(Cell(x, l)))
-                result.push_back(Node(Cell(x, l), n));
     }
-    return result;*/
+    return successors;
 }
 
+//function returns surroundings - neighbors of the current cell, but not depending on envinonmental options (cutcorners, allowsqueeze)
 std::list<Node*> LPAstar::GetSurroundings(Node *current, Map &map) {
     std::list<Node> result1;
     int x = current->point.x;
@@ -357,7 +334,7 @@ std::list<Node*> LPAstar::GetSurroundings(Node *current, Map &map) {
     return result;
 }
 
-void LPAstar::MakePrimaryPath(Node *curNode)
+void LPAstar::MakePrimaryPath(Node *curNode) //build path by cells
 {
     path.clear();
     Node current = *curNode;
@@ -368,7 +345,7 @@ void LPAstar::MakePrimaryPath(Node *curNode)
     path.push_front(current);
 }
 
-void LPAstar::makeSecondaryPath()
+void LPAstar::makeSecondaryPath() //build path by sections
 {
     std::list<Node>::const_iterator iter = path.begin();
     int curI, curJ, nextI, nextJ, moveI, moveJ;

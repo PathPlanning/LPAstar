@@ -17,7 +17,10 @@ public:
     LPAstar(double HW);
     ~LPAstar(void);
 
+    //main function for the whole pathbuilding algorithm
     LPASearchResult FindThePath(Map &map, EnvironmentOptions options);
+
+    //functions for path building
     void MakePrimaryPath(Node* curNode);
     void makeSecondaryPath();
 
@@ -31,7 +34,6 @@ private:
     std::list<Node> path;
     std::list<Node> hpath;
 
-    double linecost;
     LPASearchResult current_result;
     OpenList OPEN;
     std::unordered_map<int, Node> NODES;
@@ -42,7 +44,6 @@ private:
     void CloseOpen(double height);
     double GetCost(Cell from, Cell to, Map &map) const;
     Key CalculateKey(const Node &vertex, Map &map);
-
     std::vector<Node *> GetSuccessors(Node *curr, Map &map);
     std::list<Node *> GetSurroundings(Node *current, Map &map);
     Node GetMinPredecessor(Node* curr, Map &map);

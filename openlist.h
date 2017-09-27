@@ -6,6 +6,7 @@
 #include <list>
 #include <vector>
 
+//representation of OPEN list as vector of lists, which provides both fast access to the element with minimum key value and fast search by the point value
 class OpenList {
 public:
 
@@ -26,7 +27,7 @@ public:
         return open_size;
     }
 
-    inline Node* get() {
+    inline Node* get() { //return node wit minimum key value
         Node* best;
         Key bkey = Key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
         int coord = 0;
@@ -41,7 +42,7 @@ public:
         best = elements[coord].front();
         return best;
     }
-    void pop() {
+    void pop() { //pop the node with minimum key value
         Key bkey = Key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
         int coord = 0;
         for (size_t i = 0; i < elements.size(); i++) {
@@ -56,7 +57,7 @@ public:
         --open_size;
     }
 
-    inline Key top_key() {
+    inline Key top_key() { //return the minimum key value
         Key best_key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
         for (size_t i = 0; i < elements.size(); i++) {
 
@@ -68,7 +69,7 @@ public:
         }
         return best_key;
     }
-    inline  bool top_key_less_than(Key cur_key) {
+    inline  bool top_key_less_than(Key cur_key) { //compare the minimum key value and current key value
         bool exists = false;
         Key best_key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
         for (size_t i = 0; i < elements.size(); i++) {
@@ -83,7 +84,7 @@ public:
         return best_key < cur_key;
     }
 
-    inline void put (Node* item) {
+    inline void put (Node* item) { //add node to OPEN list or renew it's key value, is it is already there
         if (elements[item->point.y].empty()) {
             elements[item->point.y].emplace_back(item);
             ++open_size;
@@ -128,7 +129,7 @@ public:
                     std::cout << (*it)->point << (*it)->key.k1 << " ";
                 }
                 std::cout << std::endl;
-            } else std::cout << "NNAH\n";
+            } else std::cout << "None\n";
         }
     }
     void set_size(int s) { open_size = 0; }
