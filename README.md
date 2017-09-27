@@ -26,9 +26,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-**[Qt Creator]**(https://info.qt.io/download-qt-for-device-creation?hsCtaTracking=c80600ba-f2ea-45ed-97ef-6949c1c4c236%7C643bd8f4-2c59-4c4c-ba1a-4aaa05b51086) --  a cross-platform C++, JavaScript and QML integrated development environment which is part of the SDK for the Qt GUI Application development framework. 
+**[Qt Creator](https://info.qt.io/download-qt-for-device-creation?hsCtaTracking=c80600ba-f2ea-45ed-97ef-6949c1c4c236%7C643bd8f4-2c59-4c4c-ba1a-4aaa05b51086)** -  a cross-platform C++, JavaScript and QML integrated development environment which is part of the SDK for the Qt GUI Application development framework. 
 
-**[CMake]**(https://cmake.org/) -- an open-source, cross-platform family of tools designed to build, test and package software.
+**[CMake](https://cmake.org/)** - an open-source, cross-platform family of tools designed to build, test and package software.
 
 ### Installing
 
@@ -51,11 +51,11 @@ Input file should contain:
 
 1. Mandatory tag `<map>`. It describes the environment.
   * `<height>` and `<width>` - mandatory tags that define size of the map. Origin is in the upper left corner. (0,0) - is upper left, (*width*-1, *height*-1) is lower right.
-  * `<startx>` and `<starty>` - mandatory tags that define horizontal (X) and vertical (Y) offset of the start location from the upper left corner. Legal values for *startx* are [0, .., *width*-1], for *starty* - [0, .., *height*-1].
-  * `<finishx>` and `<finishy>` - mandatory tags that horizontal (X) and vertical (Y) offset of the goal location.
-  * `<grid>` - mandatory tag that describes the square grid constituting the map. It consists of `<row>` tags. Each `<row>` contains a sequence of "0" and "1" separated by blanks. "0" stands for traversable cell, "1" - for untraversable (actually any other figure but "0" can be used instead of "1").
-  * `<cellsize>` - optional tag that defines the size of one cell. One might add it to calculate scaled length of the path.
-  * `<title>`, `<URL>`, `<coordinates>`, etc - optional tags containing additional information on the map.
+  - `<startx>` and `<starty>` - mandatory tags that define horizontal (X) and vertical (Y) offset of the start location from the upper left corner. Legal values for *startx* are [0, .., *width*-1], for *starty* - [0, .., *height*-1].
+  - `<finishx>` and `<finishy>` - mandatory tags that horizontal (X) and vertical (Y) offset of the goal location.
+  - `<grid>` - mandatory tag that describes the square grid constituting the map. It consists of `<row>` tags. Each `<row>` contains a sequence of "0" and "1" separated by blanks. "0" stands for traversable cell, "1" - for untraversable (actually any other figure but "0" can be used instead of "1").
+  - `<cellsize>` - optional tag that defines the size of one cell. One might add it to calculate scaled length of the path.
+  - `<title>`, `<URL>`, `<coordinates>`, etc - optional tags containing additional information on the map.
 2. Mandatory tag `<algorithm>`. It describes the parameters of the algorithm.
   * `<metrictype>` - defines the type of metric for heuristic function. Possible values - "euclidean", "diagonal", "manhattan", "chebyshev". Default value is "euclidean".
   * `<hweight>` - defines the weight of heuristic function. Default value is "1".
