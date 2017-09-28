@@ -85,4 +85,4 @@ The main tag in Output file, which containes path length, memory and time:
 * _"length"_ stands for length of the final path
 * _"length_scaled"_ stands for actual length counting the size of cell in map
 * _"time"_ stands for elapsed time
-* _"astar_length"_ and _"astar_correct"_ stand for checking the algorithm with A\*. _astar_correct_ equals 1, if _astar_length_ equals to _length_, and 0 otherwise.
+* _"astar_length"_ and _"astar_correct"_ stand for checking the algorithm with A\* (_"astar_correct"_ equals 1, if _"astar_length"_ equals to _"length"_, and 0 - otherwise).
