@@ -80,9 +80,9 @@ The main tag in Output file, which containes path length, memory and time:
 ```xml
 <summary numberofsteps="107" nodescreated="127" length="15.414213" length_scaled="41.618375587463383" time="0.000512" astar_length="15.414213" astar_correct="1"/>
 ```
-* _numberofsteps_ stands for the number of iterations (number of expanded vertices)
-* _nodescreated_  stands for the number of nodes that were examined in general (= memory)
-* _length_ stands for length of the final path
-* _length_scaled_ stands for actual length counting the size of cell in map
-* _time_ stands for elapsed time
-* _astar_length_ and _astar_correct_ stand for checking the algorithm with A\*. _astar_correct_ equals 1, if _astar_length_ equals to _length_, and 0 otherwise.
+* _"numberofsteps"_ stands for the number of iterations (number of expanded vertices)
+* _"nodescreated"_  stands for the number of nodes that were examined in general (= memory)
+* _"length"_ stands for length of the final path
+* _"length_scaled"_ stands for actual length counting the size of cell in map
+* _"time"_ stands for elapsed time
+* _"astar_length"_ and _"astar_correct"_ stand for checking the algorithm with A\*. _astar_correct_ equals 1, if _astar_length_ equals to _length_, and 0 otherwise.
