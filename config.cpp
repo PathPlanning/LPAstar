@@ -42,60 +42,35 @@ bool Config::getConfig(const char *FileName)
         return false;
     }
 
-    element = algorithm->FirstChildElement(CNS_TAG_ST);
-    if (!element) {
-        std::cout << "Error! No '" << CNS_TAG_ST << "' tag found in XML file!" << std::endl;
-        return false;
-    }
-    if (element->GetText())
-        value = element->GetText();
-    std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+    N = 7;
+    SearchParams = new double[N];
 
-    if (value == CNS_SP_ST_BFS) {
-        N = 4;
-        SearchParams = new double[N];
-        SearchParams[CN_SP_ST] = CN_SP_ST_BFS;
+    element = algorithm->FirstChildElement(CNS_TAG_HW);
+    if (!element) {
+        std::cout << "Warning! No '" << CNS_TAG_HW << "' tag found in algorithm section." << std::endl;
+        std::cout << "Value of '" << CNS_TAG_HW << "' was defined to 1." << std::endl;
+        SearchParams[CN_SP_HW] = 1;
     }
-    else if (value == CNS_SP_ST_DIJK) {
-        N = 4;
-        SearchParams = new double[N];
-        SearchParams[CN_SP_ST] = CN_SP_ST_DIJK;
-    }
-    else if (value == CNS_SP_ST_ASTAR || value == CNS_SP_ST_JP_SEARCH || value == CNS_SP_ST_TH) {
-        N = 7;
-        SearchParams = new double[N];
-        SearchParams[CN_SP_ST] = CN_SP_ST_ASTAR;
-        if (value == CNS_SP_ST_JP_SEARCH)
-            SearchParams[CN_SP_ST] = CN_SP_ST_JP_SEARCH;
-        else if (value == CNS_SP_ST_TH)
-            SearchParams[CN_SP_ST] = CN_SP_ST_TH;
-        element = algorithm->FirstChildElement(CNS_TAG_HW);
-        if (!element) {
-            std::cout << "Warning! No '" << CNS_TAG_HW << "' tag found in algorithm section." << std::endl;
+    else {
+        stream << element->GetText();
+        stream >> SearchParams[CN_SP_HW];
+        stream.str("");
+        stream.clear();
+
+        if (SearchParams[CN_SP_HW] < 1) {
+            std::cout << "Warning! Value of '" << CNS_TAG_HW << "' tag is not correctly specified. Should be >= 1."
+                          << std::endl;
             std::cout << "Value of '" << CNS_TAG_HW << "' was defined to 1." << std::endl;
             SearchParams[CN_SP_HW] = 1;
         }
-        else {
-            stream << element->GetText();
-            stream >> SearchParams[CN_SP_HW];
-            stream.str("");
-            stream.clear();
+    }
 
-            if (SearchParams[CN_SP_HW] < 1) {
-                std::cout << "Warning! Value of '" << CNS_TAG_HW << "' tag is not correctly specified. Should be >= 1."
-                          << std::endl;
-                std::cout << "Value of '" << CNS_TAG_HW << "' was defined to 1." << std::endl;
-                SearchParams[CN_SP_HW] = 1;
-            }
-        }
-
-        element = algorithm->FirstChildElement(CNS_TAG_MT);
-        if (!element) {
-            std::cout << "Warning! No '" << CNS_TAG_MT << "' tag found in XML file." << std::endl;
-            std::cout << "Value of '" << CNS_TAG_MT << "' was defined to 'euclidean'." << std::endl;
-            SearchParams[CN_SP_MT] = CN_SP_MT_EUCL;
-        }
-        else {
+    element = algorithm->FirstChildElement(CNS_TAG_MT);
+    if (!element) {
+        std::cout << "Warning! No '" << CNS_TAG_MT << "' tag found in XML file." << std::endl;
+        std::cout << "Value of '" << CNS_TAG_MT << "' was defined to 'euclidean'." << std::endl;
+        SearchParams[CN_SP_MT] = CN_SP_MT_EUCL;
+     } else {
             if (element->GetText())
                 value = element->GetText();
             std::transform(value.begin(), value.end(), value.begin(), ::tolower);
@@ -111,33 +86,24 @@ bool Config::getConfig(const char *FileName)
             if (SearchParams[CN_SP_ST] == CN_SP_ST_TH && SearchParams[CN_SP_MT] != CN_SP_MT_EUCL) {
                 std::cout << "Warning! This type of metric is not admissible for Theta*!" << std::endl;
             }
-        }
+    }
 
 
-        element = algorithm->FirstChildElement(CNS_TAG_BT);
-        if (!element) {
-            std::cout << "Warning! No '" << CNS_TAG_BT << "' tag found in XML file" << std::endl;
+    element = algorithm->FirstChildElement(CNS_TAG_BT);
+    if (!element) {
+        std::cout << "Warning! No '" << CNS_TAG_BT << "' tag found in XML file" << std::endl;
+        std::cout << "Value of '" << CNS_TAG_BT << "' was defined to 'g-max'" << std::endl;
+        SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
+    } else {
+        value = element->GetText();
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value == CNS_SP_BT_GMIN) SearchParams[CN_SP_BT] = CN_SP_BT_GMIN;
+        else if (value == CNS_SP_BT_GMAX) SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
+        else {
+            std::cout << "Warning! Value of '" << CNS_TAG_BT << "' is not correctly specified." << std::endl;
             std::cout << "Value of '" << CNS_TAG_BT << "' was defined to 'g-max'" << std::endl;
             SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
         }
-        else {
-            value = element->GetText();
-            std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-            if (value == CNS_SP_BT_GMIN) SearchParams[CN_SP_BT] = CN_SP_BT_GMIN;
-            else if (value == CNS_SP_BT_GMAX) SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
-            else {
-                std::cout << "Warning! Value of '" << CNS_TAG_BT << "' is not correctly specified." << std::endl;
-                std::cout << "Value of '" << CNS_TAG_BT << "' was defined to 'g-max'" << std::endl;
-                SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
-            }
-        }
-    }
-    else {
-        std::cout << "Error! Value of '" << CNS_TAG_ST << "' tag (algorithm name) is not correctly specified."
-                  << std::endl;
-        std::cout << "Supported algorithm's names are: '" << CNS_SP_ST_BFS << "', '" << CNS_SP_ST_DIJK << "', '"
-                  << CNS_SP_ST_ASTAR << "', '" << CNS_SP_ST_TH << "', '" << CNS_SP_ST_JP_SEARCH << "'." << std::endl;
-        return false;
     }
 
 

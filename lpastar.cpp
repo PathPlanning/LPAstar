@@ -152,6 +152,9 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
 
 void LPAstar::Initialize(Map &map)
 {
+    Cell buf = map.start;
+    map.start = map.goal;
+    map.goal = buf;
     Node start_node = Node(map.start);
     Node goal_node = Node(map.goal);
     start_node.rhs = 0;
@@ -217,7 +220,7 @@ bool LPAstar::ComputeShortestPath(Map &map)
         current_result.pathlength = goal->g;
         MakePrimaryPath(goal); //build path from parent pointers
         current_result.lppath = &path;
-        //map.PrintPath(path);
+        //map.PrintPath(path); //can use this function to build path in console
         return true;
     }
     return false;

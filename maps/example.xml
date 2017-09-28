@@ -8,8 +8,8 @@
     <cellsize>2.7</cellsize>
     <startx>1</startx>
     <starty>1</starty>
-    <finishx>9</finishx>
-    <finishy>9</finishy>
+    <finishx>13</finishx>
+    <finishy>7</finishy>
     <grid>
         <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
         <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
@@ -30,7 +30,6 @@
 		</grid>
     </map>
     <algorithm>
-        <searchtype>astar</searchtype>
         <hweight>1</hweight>
         <metrictype>euclid</metrictype>
         <breakingties>g-max</breakingties>
