@@ -32,9 +32,9 @@
     <algorithm>
         <hweight>1</hweight>
         <metrictype>euclid</metrictype>
-        <allowdiagonal>1</allowdiagonal>
-        <allowsqueeze>1</allowsqueeze>
-        <cutcorners>1</cutcorners>
+        <allowdiagonal>true</allowdiagonal>
+        <allowsqueeze>true</allowsqueeze>
+        <cutcorners>false</cutcorners>
     </algorithm>
     <options>
         <loglevel>1</loglevel>
