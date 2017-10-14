@@ -24,12 +24,8 @@ inline bool CutOrSqueeze(Node* to, Node* from) {
 }
 
 double LPAstar::GetCost(Cell from, Cell to, Map &map) const {
-    if (map.CellIsNeighbor(from, to)) {
-        if (from.x == to.x || from.y == to.y) return 1;
-        else return CN_SQRT_TWO;
-    } else {
-        return std::numeric_limits<double>::infinity();
-    }
+    if (from.x == to.x || from.y == to.y) return 1;
+    else return CN_SQRT_TWO;
 }
 
 Key LPAstar::CalculateKey(const Node& vertex, Map &map) {
@@ -191,7 +187,6 @@ bool LPAstar::ComputeShortestPath(Map &map)
         Node* current = OPEN.get(); //returns element from OPEN with smalest key value
         if (current->g > current->rhs) {
             current->g = current->rhs;
-            OPEN.pop();
             for (auto elem : GetSuccessors(current, map)) { //for each successor(neighbor) recalculate it's rhs value
                 if (elem->rhs > current->g + GetCost(elem->point, current->point, map)) {
                     elem->parent = current;

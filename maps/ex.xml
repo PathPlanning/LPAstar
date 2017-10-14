@@ -20,10 +20,8 @@
 	</grid>
     </map>
     <algorithm>
-        <searchtype>astar</searchtype>
         <hweight>1</hweight>
         <metrictype>euclid</metrictype>
-        <breakingties>g-max</breakingties>
         <allowdiagonal>1</allowdiagonal>
         <allowsqueeze>false</allowsqueeze>
         <cutcorners>true</cutcorners>

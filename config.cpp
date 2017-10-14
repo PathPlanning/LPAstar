@@ -88,24 +88,7 @@ bool Config::getConfig(const char *FileName)
             }
     }
 
-
-    element = algorithm->FirstChildElement(CNS_TAG_BT);
-    if (!element) {
-        std::cout << "Warning! No '" << CNS_TAG_BT << "' tag found in XML file" << std::endl;
-        std::cout << "Value of '" << CNS_TAG_BT << "' was defined to 'g-max'" << std::endl;
-        SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
-    } else {
-        value = element->GetText();
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-        if (value == CNS_SP_BT_GMIN) SearchParams[CN_SP_BT] = CN_SP_BT_GMIN;
-        else if (value == CNS_SP_BT_GMAX) SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
-        else {
-            std::cout << "Warning! Value of '" << CNS_TAG_BT << "' is not correctly specified." << std::endl;
-            std::cout << "Value of '" << CNS_TAG_BT << "' was defined to 'g-max'" << std::endl;
-            SearchParams[CN_SP_BT] = CN_SP_BT_GMAX;
-        }
-    }
-
+    SearchParams[CN_SP_BT] = CN_SP_BT_GMIN;
 
     element = algorithm->FirstChildElement(CNS_TAG_AD);
     if (!element) {

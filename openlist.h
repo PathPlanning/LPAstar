@@ -23,52 +23,12 @@ public:
         return true;
     }
 
-    inline size_t size_of_open() const {
-        return open_size;
-    }
-
     inline Node* get() { //return node wit minimum key value
-        Node* best;
-        Key bkey = Key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-        int coord = 0;
-        for (size_t i = 0; i < elements.size(); i++) {
-            if (!elements[i].empty()) {
-                if (elements[i].front()->key < bkey) {
-                    bkey = elements[i].front()->key;
-                    coord = i;
-                }
-            }
-        }
-        best = elements[coord].front();
+        Node* best = elements[current_top_coord].front();
+        if (best->g > best->rhs) elements[current_top_coord].pop_front();
         return best;
     }
-    void pop() { //pop the node with minimum key value
-        Key bkey = Key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-        int coord = 0;
-        for (size_t i = 0; i < elements.size(); i++) {
-            if (!elements[i].empty()) {
-                if (elements[i].front()->key < bkey) {
-                    bkey = elements[i].front()->key;
-                    coord = i;
-                }
-            }
-        }
-        elements[coord].pop_front();
-        --open_size;
-    }
 
-    inline Key top_key() { //return the minimum key value
-        Key best_key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-        for (size_t i = 0; i < elements.size(); i++) {
-
-            if (!elements[i].empty()) {
-                if (elements[i].front()->key < best_key) {
-                   best_key = elements[i].front()->key;
-                }
-            }
-        }
-        return best_key;
-    }
     inline  bool top_key_less_than(Key cur_key) { //compare the minimum key value and current key value
         bool exists = false;
         Key best_key(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
@@ -77,6 +37,7 @@ public:
                 exists = true;
                 if (elements[i].front()->key < best_key) {
                     best_key = elements[i].front()->key;
+                    current_top_coord = i;
                 }
             }
         }
@@ -87,7 +48,6 @@ public:
     inline void put (Node* item) { //add node to OPEN list or renew it's key value, is it is already there
         if (elements[item->point.y].empty()) {
             elements[item->point.y].emplace_back(item);
-            ++open_size;
             return;
         }
         elements[item->point.y].remove_if([item](Node* curr) { return curr->point == item->point; });
@@ -101,7 +61,6 @@ public:
         }
         if (++position != elements[item->point.y].end()) elements[item->point.y].emplace(position, item);
         else elements[item->point.y].emplace_back(item);
-        ++open_size;
     }
 
     inline void remove_if(Node* item) {
@@ -132,11 +91,10 @@ public:
             } else std::cout << "None\n";
         }
     }
-    void set_size(int s) { open_size = 0; }
 
 private:
     std::vector<std::list<Node*> > elements;
-    size_t open_size;
+    int current_top_coord;
 
 };
 
