@@ -21,6 +21,8 @@ matrix:
      - MATRIX_EVAL="CC=clang"
 
 script:
+  - mkdir build
+  - cd build
   - cmake ..
   - make
 
