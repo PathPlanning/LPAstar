@@ -14,7 +14,7 @@ Current implementation is not a complete LPA\* with random map changes. For the 
 
 Additionaly, there is an implementation of pure A\* algorithm to check LPA\* after each iteration. Check after second iteration tests the accuracy of processing new obstacles. Check after thrid iteration tests the accuracy of processing the absence of old obstacles.
 
-Algorithm supports XML files as input and output format. Input file contains map and environment representation (see *"Input and Output files"* or [samples](https://bitbucket.org/nsoboleva2/lpa/src/a93edc8bc172aa99c04d880e6374d1278c809d3e/maps/?at=master))
+Algorithm supports XML files as input and output format. Input file contains map and environment representation (see *"Input and Output files"* or [samples](https://github.com/PathPlanning/LPAstar/tree/testing/maps))
 
 ## Getting Started 
 
@@ -35,7 +35,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 Download current repository to your local machine. Use
 ```
-git clone https://nsoboleva2@bitbucket.org/nsoboleva2/lpa.git
+git clone https://github.com/PathPlanning/LPAstar.git
 ```
 or direct downloading.
 
@@ -43,7 +43,7 @@ Built current project using **Qt Creator** or **CMake**. To launch the compiled 
 ```
 "initial_file_name.xml" -> "initial_file_name_log.xml"
 ```
-For more detailed information there are some samples in the [samples](https://bitbucket.org/nsoboleva2/lpa/src/a93edc8bc172aa99c04d880e6374d1278c809d3e/maps/?at=master) folder.
+For more detailed information there are some samples in the [samples](https://github.com/PathPlanning/LPAstar/tree/testing/maps) folder.
 
 ## Input and Output files
 
@@ -62,7 +62,6 @@ Input file should contain:
 
     * `<metrictype>` - defines the type of metric for heuristic function. Possible values - "euclidean", "diagonal", "manhattan", "chebyshev". Default value is "euclidean".
     * `<hweight>` - defines the weight of heuristic function. Default value is "1".
-    * `<breakingties>` - used only by A\* and defines the priority in OPEN list when nodes have the equal F-values. Possible values - "g-min", "g-max". Default value is "g-max".
     * `<allowdiagonal>` - boolean tag that defines the possibility to make diagonal moves. Setting it to "false" restricts agent to make cardinal (horizonal, vertical) moves only. Default value is "true".
     * `<cutcorners>` - boolean tag that defines the possibilty to make diagonal moves when one adjacent cell is untraversable. The tag is ignored if diagonal moves are not allowed. Default value is "false".
     * `<allowsqueeze>` - boolean tag that defines the possibility to make diagonal moves when both adjacent cells are untraversable. The tag is ignored if cutting corners is not allowed. Default value is "false".
@@ -76,7 +75,7 @@ Input file should contain:
     * `<logpath>` - defines the directory where the log-file should be written. If not specified directory of the input file is used. 
     * `<logname>` - defines the name of log-file. If not specified the name of the log file is: "input file name"+"_log"+input file extension.
 
-The main tag in Output file, which containes path length, memory and time:  
+The main tag in Output file, which containes path length, memory and time: 
 ```xml
 <summary numberofsteps="107" nodescreated="127" length="15.414213" length_scaled="41.618375587463383" time="0.000512" astar_length="15.414213" astar_correct="1"/>
 ```

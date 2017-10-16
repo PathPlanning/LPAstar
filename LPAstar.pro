@@ -1,3 +1,4 @@
+TARGET = LPAstar
 CONFIG   += console
 CONFIG   -= app_bundle
 TEMPLATE = app
