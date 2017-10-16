@@ -8,11 +8,11 @@ matrix:
       addons:
         apt:
           sources:
-	    - ubuntu-toolchain-r-test
+            - ubuntu-toolchain-r-test
           packages:
-	    - gcc-4.9
+            - gcc-4.9
             - g++-4.9
-	    - cmake
+            - cmake
       env:
         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
 
@@ -24,6 +24,3 @@ script:
   - cd build
   - cmake ..
   - make
-
-  
-	
