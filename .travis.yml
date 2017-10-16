@@ -21,8 +21,6 @@ matrix:
      - MATRIX_EVAL="CC=clang"
 
 script:
-  - qmake -v
-  - qmake -r
   - cmake ..
   - make
 
