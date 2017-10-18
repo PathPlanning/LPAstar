@@ -21,7 +21,7 @@ matrix:
      - MATRIX_EVAL="CC=clang"
 
 install:
-  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install foo; else xcode-select --install; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then xcode-select --install; fi
   
 script:
   - mkdir build
