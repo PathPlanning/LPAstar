@@ -1,5 +1,5 @@
 language: cpp
-
+  
 matrix:
  include:
   - os: linux
@@ -20,6 +20,9 @@ matrix:
     env:
      - MATRIX_EVAL="CC=clang"
 
+install:
+  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install foo; else xcode-select --install; fi
+  
 script:
   - mkdir build
   - cd build
