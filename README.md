@@ -4,15 +4,15 @@ Lifelong Planning A\* (LPA\*) is a replanning method that is an incremental vers
 ## Description
 Current project provides an implementation of [LPA\*](https://www.cs.cmu.edu/~maxim/files/aij04.pdf) algorithm adapted for single-shot grid-based 2D environment. 
 
-Current implementation is not a complete LPA\* with random map changes. For the sake of accuracy and efficiency testing the main cycle consists of three parts: 
+Current implementation is not a complete LPA\* with customer defined map changes. Based on these changes algorithm builds path according to the current changes on each iteration. The result is the latest path found. This result will contain information about all steps and nodes, that were created during the whole process. 
 
-* First iteration of LPA\* (which equals A\*): builds simple path from start to goal
-* Forced map chages: building an obstacle somewhere along the found path
-* Second iteration of LPA\*: recalculating the path depending on map changes
-* Forced map changes: destroy that new obstacle
-* Third iteration of LPA\*: recalculating the path depending on map changes
+Changes are presented in the following format: 
+* All changes should be described in special tags in input XML file (see *"Input and Output files"* or [samples](https://github.com/PathPlanning/LPAstar/tree/testing/maps))
+* All changes are divided into several iterations according to wheather they happend at the same moment or not. 
+* Every change contain several points, which were changes at the same time. 
+* Each point should be described by it's coordinates (x, y) and new state of this point {0, 1}.
 
-Additionaly, there is an implementation of pure A\* algorithm to check LPA\* after each iteration. Check after second iteration tests the accuracy of processing new obstacles. Check after thrid iteration tests the accuracy of processing the absence of old obstacles.
+If there were no changes in the input file programm will run first iteration of LPA\* (which equals A\*): find the path on the original map from start to goal and return the result.
 
 Algorithm supports XML files as input and output format. Input file contains map and environment representation (see *"Input and Output files"* or [samples](https://github.com/PathPlanning/LPAstar/tree/testing/maps))
 
@@ -39,9 +39,17 @@ git clone https://github.com/PathPlanning/LPAstar.git
 ```
 or direct downloading.
 
-Built current project using **Qt Creator** or **CMake**. To launch the compiled file you will need to pass input XML file as an argument. Output file for this project will be placed in the same folder as input file and, by default, will be named `_log.xml`. For examlpe, 
+Built current project using **Qt Creator** or **CMake**. To launch the compiled file you will need to pass input XML file as an argument. Output file for this project will be placed in the same folder as input file and, by default, will be named `_log.xml`. For examlpe, using CMake 
+```bash
+cd PATH_TO_THE_PROJECT
+cmake .
+make
+
+./LPAstar initial_file_name.xml
 ```
-"initial_file_name.xml" -> "initial_file_name_log.xml"
+Output file will be named:
+```
+initial_file_name_log.xml
 ```
 For more detailed information there are some samples in the [samples](https://github.com/PathPlanning/LPAstar/tree/testing/maps) folder.
 
@@ -65,6 +73,7 @@ Input file should contain:
     * `<allowdiagonal>` - boolean tag that defines the possibility to make diagonal moves. Setting it to "false" restricts agent to make cardinal (horizonal, vertical) moves only. Default value is "true".
     * `<cutcorners>` - boolean tag that defines the possibilty to make diagonal moves when one adjacent cell is untraversable. The tag is ignored if diagonal moves are not allowed. Default value is "false".
     * `<allowsqueeze>` - boolean tag that defines the possibility to make diagonal moves when both adjacent cells are untraversable. The tag is ignored if cutting corners is not allowed. Default value is "false".
+    * `<changes>` - tag that describes every iteration of changes, which are going to be in the process. Tag has attribute `iteration` that defines the number of groups of changes. It consists of `<change>` tags. Each `<change>` tag describes all points, which were changes at the same time. It contains `<point>` tags. Each point has attributes `x` and `y` which describe the coordinates of this point and attribute `new_state` - changed state of this point.
 
 * Optional tag `<options>`. Options that are not related to search.
 
@@ -77,7 +86,7 @@ Input file should contain:
 
 The main tag in Output file, which containes path length, memory and time: 
 ```xml
-<summary numberofsteps="107" nodescreated="127" length="15.414213" length_scaled="41.618375587463383" time="0.000512" astar_length="15.414213" astar_correct="1"/>
+<summary numberofsteps="107" nodescreated="127" length="15.414213" length_scaled="41.618375587463383" time="0.000512"/>
 ```
 * _"numberofsteps"_ stands for the number of iterations (number of expanded vertices)
 * _"nodescreated"_  stands for the number of nodes that were examined in general (= memory)
