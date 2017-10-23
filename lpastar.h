@@ -18,7 +18,7 @@ public:
     ~LPAstar(void);
 
     //main function for the whole pathbuilding algorithm
-    LPASearchResult FindThePath(Map &map, EnvironmentOptions options);
+    LPASearchResult FindThePath(Map &map, EnvironmentOptions options, std::vector<Changes> changes);
 
     //functions for path building
     void MakePrimaryPath(Node* curNode);

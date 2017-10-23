@@ -2,10 +2,10 @@
 #define	MAP_H
 #include <iostream>
 #include "node.h"
+#include "searchresult.h"
 #include "environmentoptions.h"
 #include "gl_const.h"
 #include <list>
-#include "structures.h"
 #include "tinyxml2.h"
 #include <sstream>
 #include <string>
@@ -20,8 +20,7 @@ class Map
         Map(const Map& orig);
         ~Map();
 
-        Changes DamageTheMap(std::list<Node> path);
-        Changes ClearTheMap(std::list<Cell> damaged);
+        void ChangeMap(Changes iter);
         bool GetMap(const char *name);
         bool CellIsTraversable (Cell curr) const;
         bool CellOnGrid (Cell curr) const;

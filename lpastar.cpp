@@ -34,7 +34,7 @@ Key LPAstar::CalculateKey(const Node& vertex, Map &map) {
 }
 
 //The main pathbuilding function
-LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
+LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options, std::vector<Changes> changes)
 {
     opt = options;
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -50,84 +50,77 @@ LPASearchResult LPAstar::FindThePath(Map &map, EnvironmentOptions options)
         std::cout << "Pathbuilding algoritm's error: THE PATH DOES NOT EXISTS\n";
         return current_result;
     }
-    Changes changes = map.DamageTheMap(path); //force map to change (sufficient for the correct testing)
-    for (auto dam : changes.occupied) { //for each damaged (0 -> 1) cell recounting values for it's neighbors
-        if (NODES.count(vertex(dam, map.height))) {
-            Node* d = &(NODES.find(vertex(dam, map.height))->second);
-            OPEN.remove_if(d);
-            for (auto neighbor: GetSurroundings(d, map)) {
-                if (!(neighbor->point == map.start) && (neighbor->parent->point == dam || CutOrSqueeze(neighbor, d))) {
-                    Node min_val = GetMinPredecessor(neighbor, map);
-                    if (!min_val.parent) {
-                        OPEN.remove_if(neighbor);
-                        if(neighbor->point == goal->point) { //means that after changes goal point became unreachable
-                            current_result.pathfound = false;
-                            current_result.pathlength = 0;
-                            end = std::chrono::system_clock::now();
-                            current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
-                            std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
-                            return current_result;
+    for (auto iteration : changes) {
+        map.ChangeMap(iteration);
+        for (auto dam : iteration.occupied) {
+            if (NODES.count(vertex(dam, map.height))) {
+                Node* d = &(NODES.find(vertex(dam, map.height))->second);
+                OPEN.remove_if(d);
+                for (auto neighbor: GetSurroundings(d, map)) {
+                    if (!(neighbor->point == map.start) && (neighbor->parent->point == dam || CutOrSqueeze(neighbor, d))) {
+                        Node min_val = GetMinPredecessor(neighbor, map);
+                        if (!min_val.parent) {
+                            OPEN.remove_if(neighbor);
+                            if(neighbor->point == goal->point) { //means that after changes goal point became unreachable
+                                current_result.pathfound = false;
+                                current_result.pathlength = 0;
+                                end = std::chrono::system_clock::now();
+                                current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+                                std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
+                                return current_result;
+                            }
+                        } else {
+                            neighbor->rhs = min_val.rhs;
+                            neighbor->parent = min_val.parent;
+                            UpdateVertex(neighbor, map);
                         }
-                    } else {
-                        neighbor->rhs = min_val.rhs;
-                        neighbor->parent = min_val.parent;
-                        UpdateVertex(neighbor, map);
                     }
                 }
             }
         }
-    }
-    if(!ComputeShortestPath(map)) {
-        current_result.pathfound = false;
-        current_result.pathlength = 0;
-        end = std::chrono::system_clock::now();
-        current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
-        std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
-        return current_result;
-    }
-    changes = map.ClearTheMap(changes.occupied); //force map to change (here: clear all previous damage)
-    for (auto cleared : changes.cleared) { //for each cell, that was cleared (1 -> 0) recounting values for it & it's neighbors
-       Node new_node(cleared);
-       new_node.rhs = std::numeric_limits<double>::infinity();
-       new_node.g = std::numeric_limits<double>::infinity();
-       NODES[vertex(cleared, map.height)] = new_node;
-       Node * cl = &(NODES.find(vertex(cleared, map.height))->second);
-       Node min_val = GetMinPredecessor(cl, map);
-       if (min_val.parent) {
-           cl->rhs = min_val.rhs;
-           cl->parent = min_val.parent;
-           cl->g = min_val.parent->g + GetCost(cl->point, min_val.parent->point, map);
-           UpdateVertex(cl, map);
-       } else {
-           break; //means that this cell is unreachable and there's no need to recount values for it's neighbors
-       }
-       for (auto neighbor : GetSuccessors(cl, map)) {
-           if (neighbor->rhs > cl->g + GetCost(neighbor->point, cl->point, map)) {
-               neighbor->parent = cl;
-               neighbor->rhs = cl->g + GetCost(neighbor->point, cl->point, map);
-               UpdateVertex(neighbor, map);
+        for (auto cleared : iteration.cleared) { //for each cell, that was cleared (1 -> 0) recounting values for it & it's neighbors
+           Node new_node(cleared);
+           new_node.rhs = std::numeric_limits<double>::infinity();
+           new_node.g = std::numeric_limits<double>::infinity();
+           NODES[vertex(cleared, map.height)] = new_node;
+           Node * cl = &(NODES.find(vertex(cleared, map.height))->second);
+           Node min_val = GetMinPredecessor(cl, map);
+           if (min_val.parent) {
+               cl->rhs = min_val.rhs;
+               cl->parent = min_val.parent;
+               cl->g = min_val.parent->g + GetCost(cl->point, min_val.parent->point, map);
+               UpdateVertex(cl, map);
+           } else {
+               break; //means that this cell is unreachable and there's no need to recount values for it's neighbors
            }
-           if (neighbor->point.x == cl->point.x || neighbor->point.y == cl->point.y) {
-               Node min_val = GetMinPredecessor(neighbor, map);
-               if (!min_val.parent) {
-                   OPEN.remove_if(neighbor);
-                   if(neighbor->point == goal->point) { //means that goal became unreachable
-                       current_result.pathfound = false;
-                       current_result.pathlength = 0;
-                       end = std::chrono::system_clock::now();
-                       current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
-                       std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
-                       return current_result;
-                   }
-               } else {
-                   neighbor->rhs = min_val.rhs;
-                   neighbor->parent = min_val.parent;
+           for (auto neighbor : GetSuccessors(cl, map)) {
+               if (neighbor->rhs > cl->g + GetCost(neighbor->point, cl->point, map)) {
+                   neighbor->parent = cl;
+                   neighbor->rhs = cl->g + GetCost(neighbor->point, cl->point, map);
                    UpdateVertex(neighbor, map);
                }
+               if (neighbor->point.x == cl->point.x || neighbor->point.y == cl->point.y) {
+                   Node min_val = GetMinPredecessor(neighbor, map);
+                   if (!min_val.parent) {
+                       OPEN.remove_if(neighbor);
+                       if(neighbor->point == goal->point) { //means that goal became unreachable
+                           current_result.pathfound = false;
+                           current_result.pathlength = 0;
+                           end = std::chrono::system_clock::now();
+                           current_result.time = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()) / 1000000000;
+                           std::cout << "Pathbuilding algoritm's error: AFTER CHANGES THE PATH DOES NOT EXISTS\n";
+                           return current_result;
+                       }
+                   } else {
+                       neighbor->rhs = min_val.rhs;
+                       neighbor->parent = min_val.parent;
+                       UpdateVertex(neighbor, map);
+                   }
+               }
            }
-       }
+        }
     }
-    if(!ComputeShortestPath(map)){
+    if(!ComputeShortestPath(map)) {
         current_result.pathfound = false;
         current_result.pathlength = 0;
         end = std::chrono::system_clock::now();

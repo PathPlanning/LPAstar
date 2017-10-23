@@ -22,7 +22,7 @@ bool Config::getConfig(const char *FileName)
 {
     std::string value;
     std::stringstream stream;
-    tinyxml2::XMLElement *root = 0, *algorithm = 0, *element = 0, *options = 0;
+    tinyxml2::XMLElement *root = 0, *algorithm = 0, *element = 0, *options = 0, *change = 0, *point = 0;
 
     tinyxml2::XMLDocument doc;
     if (doc.LoadFile(FileName) != tinyxml2::XMLError::XML_SUCCESS) {
@@ -173,7 +173,46 @@ bool Config::getConfig(const char *FileName)
             }
         }
     }
-
+    element = algorithm->FirstChildElement(CNS_TAG_CHS);
+    if (!element) {
+        std::cout << "Warning! No '" << CNS_TAG_CHS << "' tag found in XML file." << std::endl;
+        std::cout << "There will be no changes during the search." << std::endl;
+    } else {
+        int iterations = element->IntAttribute(CNS_TAG_ATTR_Q);
+        //changes.reserve(iterations);
+        change = element->FirstChildElement(CNS_TAG_CH);
+        for (change;change;change=change->NextSiblingElement(CNS_TAG_CH)){
+            int number = change->IntAttribute(CNS_TAG_NUM);
+            if (!change) {
+                std::cout << "Warning! Iteration number " << number << ": no'" << CNS_TAG_CH << "' tag found in XML file." << std::endl;
+                std::cout << "There will be no changes during iteration number " << number << "." << std::endl;
+            } else {
+                Changes changesvec;
+                point = change->FirstChildElement(CNS_TAG_P);
+                if(!point) {
+                    std::cout << "Warning! Iteration number " << number << ": no'" << CNS_TAG_P << "' tag found in XML file." << std::endl;
+                    std::cout << "There will be no changes during iteration number " << number << "." << std::endl;
+                } else {
+                    for (point; point; point = point->NextSiblingElement(CNS_TAG_P)) {
+                        int x = point->IntAttribute(CNS_TAG_ATTR_X);
+                        int y = point->IntAttribute(CNS_TAG_ATTR_Y);
+                        int check = point->IntAttribute(CNS_TAG_ATTR_STATE);
+                        if (check != CN_GC_NOOBS && check != CN_GC_OBS) {
+                            std::cout << "Warning! Value of '" << CNS_TAG_ATTR_STATE << "' is not correctly specified." << std::endl;
+                            std::cout << "Value of '" << CNS_TAG_ATTR_STATE << "' was defined to default - " << CN_GC_NOOBS << std::endl;
+                            changesvec.cleared.push_back(Cell(x, y));
+                        }
+                        else if (check == CN_GC_OBS) {
+                            changesvec.occupied.push_back(Cell(x, y));
+                        }
+                        else
+                            changesvec.cleared.push_back(Cell(x, y));
+                    }
+                }
+                changes.push_back(changesvec);
+            }
+        }
+    }
     options = root->FirstChildElement(CNS_TAG_OPT);
     LogParams = new std::string[3];
     LogParams[CN_LP_PATH] = "";

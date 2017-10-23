@@ -8,8 +8,8 @@
     <cellsize>2.7</cellsize>
     <startx>1</startx>
     <starty>1</starty>
-    <finishx>13</finishx>
-    <finishy>7</finishy>
+    <finishx>9</finishx>
+    <finishy>9</finishy>
     <grid>
         <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
         <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
@@ -35,6 +35,20 @@
         <allowdiagonal>true</allowdiagonal>
         <allowsqueeze>true</allowsqueeze>
         <cutcorners>false</cutcorners>
+        <changes iterations="3">
+            <change iteration="1">
+                <point x="1" y="3" new_state="1"/>
+                <point x="1" y="4" new_state="1"/>
+            </change>
+            <change iteration="2">
+                <point x="1" y="3" new_state="0"/>
+                <point x="1" y="4" new_state="0"/>
+            </change>
+            <change iteration="3">
+                <point x="1" y="3" new_state="1"/>
+                <point x="2" y="8" new_state="0"/>
+            </change>
+        </changes>
     </algorithm>
     <options>
         <loglevel>1</loglevel>

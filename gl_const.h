@@ -26,6 +26,10 @@
         #define CNS_TAG_AS          "allowsqueeze"
         #define CNS_TAG_AD          "allowdiagonal"
         #define CNS_TAG_CC          "cutcorners"
+        #define CNS_TAG_CHS         "changes"
+        #define CNS_TAG_CH          "change"
+        #define CNS_TAG_P           "point"
+        #define CNS_TAG_NUM         "iteration"
 
     #define CNS_TAG_OPT             "options"
         #define CNS_TAG_LOGLVL      "loglevel"
@@ -65,6 +69,8 @@
     #define CNS_TAG_ATTR_STY            "start.y"
     #define CNS_TAG_ATTR_FINX           "finish.x"
     #define CNS_TAG_ATTR_FINY           "finish.y"
+    #define CNS_TAG_ATTR_Q              "iterations"
+    #define CNS_TAG_ATTR_STATE          "new_state"
 
 
 //Search Parameters

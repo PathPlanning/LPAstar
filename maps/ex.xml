@@ -25,6 +25,20 @@
         <allowdiagonal>true</allowdiagonal>
         <allowsqueeze>false</allowsqueeze>
         <cutcorners>true</cutcorners>
+        <changes iterations="3">
+            <change iteration="1">
+                <point x="1" y="3" new_state="1"/>
+                <point x="1" y="4" new_state="1"/>
+            </change>
+            <change iteration="2">
+                <point x="1" y="3" new_state="0"/>
+                <point x="1" y="4" new_state="0"/>
+            </change>
+            <change iteration="3">
+                <point x="1" y="3" new_state="1"/>
+                <point x="2" y="4" new_state="0"/>
+            </change>
+        </changes>
     </algorithm>
     <options>
         <loglevel>1</loglevel>

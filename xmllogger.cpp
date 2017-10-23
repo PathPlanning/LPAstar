@@ -128,92 +128,6 @@ void XmlLogger::writeToLogMap(const Map &map, const std::list<Node> &path, bool 
     }
 }
 
-void XmlLogger::writeToLogOpenClose(const std::vector<std::list<ANode> > &open, const std::unordered_map<int, ANode> &close, bool last)
-{
-    if (loglevel != CN_LP_LEVEL_FULL_WORD  && !(loglevel == CN_LP_LEVEL_MEDIUM_WORD && last))
-        return;
-
-    XMLElement *element  = doc.NewElement(CNS_TAG_STEP);
-    XMLElement *child    = 0;
-    XMLElement *lowlevel = doc.FirstChildElement(CNS_TAG_ROOT);
-    lowlevel = lowlevel->FirstChildElement(CNS_TAG_LOG)->FirstChildElement(CNS_TAG_LOWLEVEL);
-
-    int iterate = 0;
-    for (child = lowlevel->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
-        iterate++;
-
-    element->SetAttribute(CNS_TAG_ATTR_NUM, iterate);
-    lowlevel->InsertEndChild(element);
-    lowlevel = lowlevel->LastChildElement();
-
-    lowlevel->InsertEndChild(doc.NewElement(CNS_TAG_OPEN));
-    child = lowlevel->LastChildElement();
-
-    ANode min;
-    min.F = -1;
-    int exc = 0;
-    for (int i = 0; i < open.size(); ++i) {
-        if (open[i].size() > 0) {
-            if (open[i].begin()->F <= min.F || min.F == -1) {
-                if (open[i].begin()->F == min.F && open[i].begin()->g > min.g) {
-                    min = *open[i].begin();
-                    exc = i;
-                } else if (open[i].begin()->F < min.F || min.F == -1) {
-                    min = *open[i].begin();
-                    exc = i;
-                }
-            }
-        }
-    }
-    if (min.F != -1) {
-        element = doc.NewElement(CNS_TAG_POINT);
-        element->SetAttribute(CNS_TAG_ATTR_X, min.j);
-        element->SetAttribute(CNS_TAG_ATTR_Y, min.i);
-        element->SetAttribute(CNS_TAG_ATTR_F, min.F);
-        element->SetAttribute(CNS_TAG_ATTR_G, min.g);
-        if (min.g > 0) {
-            element->SetAttribute(CNS_TAG_ATTR_PARX, min.parent->j);
-            element->SetAttribute(CNS_TAG_ATTR_PARY, min.parent->i);
-        }
-        child->InsertEndChild(element);
-    }
-    for (int i = 0; i < open.size(); ++i) {
-        if (open[i].size() > 0) {
-            for (auto it = open[i].begin(); it != open[i].end(); ++it) {
-                if (it != open[exc].begin()) {
-                    element = doc.NewElement(CNS_TAG_POINT);
-                    element->SetAttribute(CNS_TAG_ATTR_X, it->j);
-                    element->SetAttribute(CNS_TAG_ATTR_Y, it->i);
-                    element->SetAttribute(CNS_TAG_ATTR_F, it->F);
-                    element->SetAttribute(CNS_TAG_ATTR_G, it->g);
-                    if (it->g > 0) {
-                        element->SetAttribute(CNS_TAG_ATTR_PARX, it->parent->j);
-                        element->SetAttribute(CNS_TAG_ATTR_PARY, it->parent->i);
-                    }
-                    child->InsertEndChild(element);
-                }
-                child->InsertEndChild(element);
-            }
-        }
-    }
-
-    lowlevel->InsertEndChild(doc.NewElement(CNS_TAG_CLOSE));
-    child = lowlevel->LastChildElement();
-
-    for (auto it = close.begin(); it != close.end(); ++it) {
-        element = doc.NewElement(CNS_TAG_POINT);
-        element->SetAttribute(CNS_TAG_ATTR_X, it->second.j);
-        element->SetAttribute(CNS_TAG_ATTR_Y, it->second.i);
-        element->SetAttribute(CNS_TAG_ATTR_F, it->second.F);
-        element->SetAttribute(CNS_TAG_ATTR_G, it->second.g);
-        if (it->second.g > 0) {
-            element->SetAttribute(CNS_TAG_ATTR_PARX, it->second.parent->j);
-            element->SetAttribute(CNS_TAG_ATTR_PARY, it->second.parent->i);
-        }
-        child->InsertEndChild(element);
-    }
-}
-
 void XmlLogger::writeToLogPath(const std::list<Node> &path)
 {
     if (loglevel == CN_LP_LEVEL_NOPE_WORD || loglevel == CN_LP_LEVEL_TINY_WORD || path.empty())
@@ -257,7 +171,7 @@ void XmlLogger::writeToLogHPpath(const std::list<Node> &hppath)
     }
 }
 
-void XmlLogger::writeToLogSummary(unsigned int numberofsteps, unsigned int nodescreated, float length, double time, double cellSize, float alength, bool acorrect)
+void XmlLogger::writeToLogSummary(unsigned int numberofsteps, unsigned int nodescreated, float length, double time, double cellSize)
 {
     if (loglevel == CN_LP_LEVEL_NOPE_WORD)
         return;
@@ -270,12 +184,6 @@ void XmlLogger::writeToLogSummary(unsigned int numberofsteps, unsigned int nodes
     element->SetAttribute(CNS_TAG_ATTR_LENGTH, length);
     element->SetAttribute(CNS_TAG_ATTR_LENGTH_SCALED, length*cellSize);
     element->SetAttribute(CNS_TAG_ATTR_TIME, std::to_string(time).c_str());
-
-    element->SetAttribute(CNS_TAG_ATTR_ALENGTH, alength);
-    if (acorrect)
-        element->SetAttribute(CNS_TAG_ATTR_ACORRECT, 1);
-    else
-        element->SetAttribute(CNS_TAG_ATTR_ACORRECT, 0);
 }
 
 void XmlLogger::writeToLogNotFound()

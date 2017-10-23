@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 #include <string>
+#include "searchresult.h"
 
 class Config
 {
@@ -11,9 +12,10 @@ class Config
         bool getConfig(const char *FileName);
 
     public:
-        double*         SearchParams;
-        std::string*    LogParams;
-        unsigned int    N;
+        double*                SearchParams;
+        std::string*           LogParams;
+        unsigned int           N;
+        std::vector<Changes>   changes;
 
 };
 

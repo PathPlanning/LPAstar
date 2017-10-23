@@ -6,7 +6,6 @@
 #include "ilogger.h"
 #include "searchresult.h"
 #include "environmentoptions.h"
-#include "astar.h"
 #include "lpastar.h"
 #include "xmllogger.h"
 
@@ -33,10 +32,8 @@ class Mission
         Config                  config;
         EnvironmentOptions      options;
         LPAstar                 lpasearch;
-        Astar                   search;
         ILogger*                logger;
         const char*             fileName;
-        SearchResult            sr;
         LPASearchResult         lparesult;
         bool                    correct;
 };
