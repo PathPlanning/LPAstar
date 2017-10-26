@@ -1,4 +1,7 @@
 # Lifelong Planning A*
+
+[![Build Status](https://travis-ci.org/PathPlanning/LPAstar.svg?branch=master)](https://travis-ci.org/PathPlanning/LPAstar)
+
 Lifelong Planning A\* (LPA\*) is a replanning method that is an incremental version of A\* algorithm for single-shot grid-based 2D path finding. 
 
 ## Description
