@@ -43,7 +43,7 @@
     </options>
     <log>
         <mapfilename>/home/admin/Pathplanning/LPAstar/LPAstar/maps/example.xml</mapfilename>
-        <summary numberofsteps="168" nodescreated="104" length="15.656855" length_scaled="42.27350749969483" time="0.001366" astar_length="15.656855" astar_correct="1"/>
+        <summary numberofsteps="168" nodescreated="104" length="15.656855" length_scaled="42.27350749969483" time="0.001069" astar_length="15.656855" astar_correct="1"/>
         <path>
             <row number="0">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 </row>
             <row number="1">0 * 0 0 0 0 0 0 0 0 0 0 0 0 0 0 </row>

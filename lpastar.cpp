@@ -216,7 +216,7 @@ bool LPAstar::ComputeShortestPath(Map &map, EnvironmentOptions opt)
         current_result.pathlength = goal->g;
         MakePrimaryPath(goal); //build path from parent pointers
         current_result.lppath = &path;
-        //map.PrintPath(path); //can use this function to build path in console
+        map.PrintPath(path); //can use this function to build path in console
         return true;
     }
     return false;

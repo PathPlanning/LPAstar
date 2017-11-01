@@ -50,16 +50,22 @@ public:
             elements[item->cell.y].emplace_back(item);
             return;
         }
-        elements[item->cell.y].remove_if([item](Node* curr) { return curr->cell == item->cell; });
+        //elements[item->cell.y].remove_if([item](Node* curr) { return curr->cell == item->cell; });
         std::list<Node*>::iterator it = elements[item->cell.y].begin();
         std::list<Node*>::iterator position = elements[item->cell.y].end();
+        bool found_position = false;
         while (it != elements[item->cell.y].end()) {
-            if ((*it)->key < item->key) {
+            if (!found_position && !((*it)->key < item->key)) {
                 position = it;
+                found_position = true;
+            }
+            if ((*it)->cell == item->cell) {
+                elements[item->cell.y].erase(it);
+                --it;
             }
             ++it;
         }
-        if (++position != elements[item->cell.y].end()) elements[item->cell.y].emplace(position, item);
+        if (found_position) elements[item->cell.y].emplace(position, item);
         else elements[item->cell.y].emplace_back(item);
     }
 
