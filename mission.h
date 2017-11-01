@@ -38,7 +38,7 @@ class Mission
         const char*             fileName;
         SearchResult            sr;
         LPASearchResult         lparesult;
-        bool                    correct;
+        bool                    LPAmatchesA;
 };
 
 #endif

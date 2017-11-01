@@ -41,45 +41,31 @@ bool Map::CellOnGrid(Cell curr) const
     return (curr.y < height && curr.y >= 0 && curr.x < width && curr.x >= 0);
 }
 
-bool Map::Squeeze(Cell next, Cell current) const {
-    if (next.x == current.x || next.y == current.y) return 1;
-    if (algorithm_info.allowsqueeze) return 1;
-    if (next.x + 1 == current.x && next.y - 1 == current.y)
-        return !(Grid[current.y][current.x - 1] && Grid[current.y + 1][current.x]);
-    if (next.x + 1 == current.x && next.y + 1 == current.y)
-        return !(Grid[current.y][current.x - 1] && Grid[current.y - 1][current.x]);
-    if (next.x - 1 == current.x && next.y + 1 == current.y)
-        return !(Grid[current.y][current.x + 1] && Grid[current.y - 1][current.x]);
-    if (next.x - 1 == current.x && next.y - 1 == current.y)
-        return !(Grid[current.y][current.x + 1] && Grid[current.y + 1][current.x]);
-    return 0;
-}
-
-bool Map::Cut(Cell next, Cell current) const {
-    if (next.x == current.x || next.y == current.y) return 1;
-    if (algorithm_info.cutcorners) return 1;
-    if (next.x + 1 == current.x && next.y - 1 == current.y)
-        return !(Grid[current.y][current.x - 1] || Grid[current.y + 1][current.x]);
-    if (next.x + 1 == current.x && next.y + 1 == current.y)
-        return !(Grid[current.y][current.x - 1] || Grid[current.y - 1][current.x]);
-    if (next.x - 1 == current.x && next.y + 1 == current.y)
-        return !(Grid[current.y][current.x + 1] || Grid[current.y - 1][current.x]);
-    if (next.x - 1 == current.x && next.y - 1 == current.y)
-        return !(Grid[current.y][current.x + 1] || Grid[current.y + 1][current.x]);
-    return 0;
-}
-
-bool Map::CellIsNeighbor(Cell next, Cell current) const
-{
-    return CellOnGrid(next) && CellIsTraversable(next)
-            && Squeeze(next, current) && Cut(next, current);
-}
-
 void Map::BuildGrid() {
     Grid = new int * [height];
     for(int count = 0; count < height; ++count){
         Grid[count] = new int [width];
     }
+}
+
+const int Map::get_height() const {
+    return height;
+}
+
+const int Map::get_width() const {
+    return width;
+}
+
+Cell Map::get_start() const {
+    return start;
+}
+
+Cell Map::get_goal() const {
+    return goal;
+}
+
+double Map::get_cellsize() const {
+    return CellSize;
 }
 
 //function that force map to block the path, sufficient for testing
@@ -90,7 +76,8 @@ Changes Map::DamageTheMap(std::list<Node> path)
     std::mt19937 rng(rd());
     std::uniform_int_distribution<int> uni(3, path.size() - 3);
 
-    auto random_number = uni(rng); //create random number to damage random part of the path
+    //auto random_number = uni(rng); //create random number to damage random part of the path
+    int random_number = 3;
     int i = 0;
     Node crash = path.front();
     auto it = path.begin();
@@ -102,8 +89,8 @@ Changes Map::DamageTheMap(std::list<Node> path)
         ++it;
     }
 
-    int x = crash.point.x;
-    int y = crash.point.y;
+    int x = crash.cell.x;
+    int y = crash.cell.y;
     damaged = Cell(x,y);
     for (int k = y - 1; k <= y + 1; ++k) {
         for (int l = x - 1; l <= x + 1; ++l) {
@@ -114,8 +101,8 @@ Changes Map::DamageTheMap(std::list<Node> path)
         }
     }
 
-    x = crash.point.x + 1;
-    y = crash.point.y - 1;
+    x = crash.cell.x + 1;
+    y = crash.cell.y - 1;
     for (int k = y - 1; k <= y + 1; ++k) {
         for (int l = x - 1; l <= x + 1; ++l) {
             if (CellOnGrid(Cell(l, k)) && CellIsTraversable(Cell(l, k)) && Cell(l,k) != goal && Cell(l,k) != start) {
@@ -143,7 +130,7 @@ void Map::PrintPath(std::list<Node> path) {
         for (size_t j = 0; j < width; ++j) {
             bool p = false;
             for (auto elem : path) {
-                if (elem.point == Cell(j,i)) {
+                if (elem.cell == Cell(j,i)) {
                     std::cout << "* ";
                     p = true;
                     break;

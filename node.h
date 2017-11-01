@@ -61,6 +61,9 @@ struct Key{
     inline bool operator==(const Key& p) const {
         return k1 == p.k1 && k2 == p.k2;
     }
+    inline bool operator!=(const Key& p) const {
+        return !(*this == p);
+    }
     inline bool operator<(const Key& p) const {
         return k1 < p.k1 || (k1 == p.k1 && k2 <= p.k2);
     }
@@ -79,22 +82,17 @@ struct Key{
 
 class Node {
 public:
-    double rhs, g, h;
+    double rhs, g;
     Key key;
-    Cell point;
+    Cell cell;
     Node *parent;
 
     Node() {}
     Node(const Cell& p, Node *c = nullptr) : g(std::numeric_limits<double>::infinity()),
-        rhs(std::numeric_limits<double>::infinity()), point(p), parent(c) {}
-
-    bool operator==(const Node& another) const {
-        return point == another.point && rhs == another.rhs
-                &&parent == another.parent && g == another.g && h == another.h;
-    }
+        rhs(std::numeric_limits<double>::infinity()), cell(p), parent(c) {}
 
     Node& operator=(const Node& other) {
-        point = other.point;
+        cell = other.cell;
         rhs = other.rhs;
         g = other.g;
         parent = other.parent;
@@ -108,11 +106,11 @@ public:
 };
 
 inline bool operator<(const Node& one, const Node& another) {
-    return one.point.x < another.point.x;
+    return one.cell.x < another.cell.x;
 }
 
 inline std::ostream& operator<< (std::ostream& out, const Node &next) {
-    out << "(" << next.point.x << "," << next.point.y << "); ";
+    out << "(" << next.cell.x << "," << next.cell.y << "); ";
     return out;
 }
 

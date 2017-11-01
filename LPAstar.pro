@@ -23,7 +23,6 @@ HEADERS += \
     map.h \
     node.h \
     openlist.h \
-    structures.h \
     lpastar.h \
     heuristics.h \
     astar.h \

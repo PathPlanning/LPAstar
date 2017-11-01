@@ -7,14 +7,14 @@ Mission::Mission()
 {
     logger = nullptr;
     fileName = nullptr;
-    correct = false;
+    LPAmatchesA = false;
 }
 
 Mission::Mission(const char *FileName)
 {
     fileName = FileName;
     logger = nullptr;
-    correct = false;
+    LPAmatchesA = false;
 }
 
 Mission::~Mission()
@@ -52,7 +52,6 @@ void Mission::createEnvironmentOptions()
     else
         options = EnvironmentOptions(config.SearchParams[CN_SP_AS], config.SearchParams[CN_SP_AD],
                                      config.SearchParams[CN_SP_CC], config.SearchParams[CN_SP_MT]);
-    map.algorithm_info = options;
 }
 
 void Mission::createSearch()
@@ -64,37 +63,46 @@ void Mission::createSearch()
 void Mission::startSearch()
 {
     lparesult = lpasearch.FindThePath(map, options);
-    sr = search.startSearch(logger, map, options);
+    if (!lparesult.goal_became_unreachable) {
+        sr = search.startSearch(logger, map, options);
+        if (!lparesult.pathfound && !sr.pathfound) {
+            LPAmatchesA = true;
+            std::cout << "For both LPAstar and Astar algorithms path does not exist\n";
+        }
+        if (lparesult.pathlength == sr.pathlength) {
+            LPAmatchesA = true;
+            std::cout << "LPAstar is correct: LPAstar path length matches Astar path length\n";
+        }
+    } else {
+        LPAmatchesA = true;
+    }
+
 }
 
 void Mission::printSearchResultsToConsole()
 {
-
+    std::cout << "LPApath ";
     if (!lparesult.pathfound)
-        std::cout << "Path NOT found!!\n";
-    if(lparesult.pathfound)
-        std::cout << "LPApath " << lparesult.pathlength << std::endl;
-    std::cout << "Path ";
+        std::cout << "NOT ";
+    std::cout << "found!" << std::endl;
+    std::cout << "Apath ";
     if (!sr.pathfound)
         std::cout << "NOT ";
     std::cout << "found!" << std::endl;
-    std::cout << "numberofsteps=" << sr.numberofsteps << std::endl;
-    std::cout << "nodescreated=" << sr.nodescreated << std::endl;
-    if (sr.pathfound) {
-        std::cout << "pathlength=" << sr.pathlength << std::endl;
-        std::cout << "pathlength_scaled=" << sr.pathlength * map.CellSize << std::endl;
-    }
-    std::cout << "time=" << sr.time << std::endl;
 
-    if (lparesult.pathlength == sr.pathlength) {
-        correct = true;
-        std::cout << "YEEEEEEEEEE" << std::endl;
+    std::cout << "numberofsteps: LPAstar=" << lparesult.numberofsteps << ", Astar=" << sr.numberofsteps << std::endl;
+    std::cout << "nodescreated: LPAstar=" << lparesult.nodescreated << ", Astar=" << sr.nodescreated << std::endl;
+
+    if (sr.pathfound && lparesult.pathfound) {
+        std::cout << "pathlength: LPAstar="  << lparesult.pathlength << ", Astar=" << sr.pathlength << std::endl;
+        std::cout << "pathlength_scaled: LPAstar=" <<  lparesult.pathlength * map.get_cellsize() << ", Astar=" <<  sr.pathlength * map.get_cellsize() << std::endl;
     }
+    std::cout << "time: LPAstar=" << lparesult.time << ", Astar=" <<  sr.time << std::endl;
 }
 
 void Mission::saveSearchResultsToLog()
 {
-    logger->writeToLogSummary(lparesult.numberofsteps, lparesult.nodescreated, lparesult.pathlength, lparesult.time, map.CellSize, sr.pathlength, correct);
+    logger->writeToLogSummary(lparesult.numberofsteps, lparesult.nodescreated, lparesult.pathlength, lparesult.time, map.get_cellsize(), sr.pathlength, LPAmatchesA);
     if (lparesult.pathfound) {
         logger->writeToLogPath(*lparesult.lppath);
         logger->writeToLogHPpath(*lparesult.hppath);
@@ -104,20 +112,4 @@ void Mission::saveSearchResultsToLog()
         logger->writeToLogNotFound();
     }
     logger->saveLog();
-}
-
-const char *Mission::getAlgorithmName()
-{
-    if (config.SearchParams[CN_SP_ST] == CN_SP_ST_ASTAR)
-        return CNS_SP_ST_ASTAR;
-    else if (config.SearchParams[CN_SP_ST] == CN_SP_ST_DIJK)
-        return CNS_SP_ST_DIJK;
-    else if (config.SearchParams[CN_SP_ST] == CN_SP_ST_BFS)
-        return CNS_SP_ST_BFS;
-    else if (config.SearchParams[CN_SP_ST] == CN_SP_ST_JP_SEARCH)
-        return CNS_SP_ST_JP_SEARCH;
-    else if (config.SearchParams[CN_SP_ST] == CN_SP_ST_TH)
-        return CNS_SP_ST_TH;
-    else
-        return "";
 }

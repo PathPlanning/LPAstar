@@ -21,10 +21,8 @@ inline double cheb_heuristic(Cell a, Cell b) {
     return std::max(abs(a.x - b.x), abs(a.y - b.y));
 }
 
-
-template <typename Graph>
-inline double heuristic(Cell a, Cell b, const Graph &graph) {
-    const int h = graph.algorithm_info.metrictype;
+inline double heuristic(Cell a, Cell b, int metrics) {
+    const int h = metrics;
     if (h == CN_SP_MT_EUCL) return euclid_heuristic(a, b);
     if (h == CN_SP_MT_MANH) return manhattan_heuristic(a, b);
     if (h == CN_SP_MT_DIAG) return octile_heuristic(a, b);

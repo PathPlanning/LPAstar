@@ -28,12 +28,12 @@ SearchResult Astar::startSearch(ILogger *Logger, const Map &map, const Environme
 {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
-    open.resize(map.height);
+    open.resize(map.get_height());
     ANode curNode;
-    curNode.i = map.start.y;
-    curNode.j = map.start.x;
+    curNode.i = map.get_start().y;
+    curNode.j = map.get_start().x;
     curNode.g = 0;
-    curNode.H = computeHFromCellToCell(curNode.i, curNode.j, map.goal.y, map.goal.x, options);
+    curNode.H = computeHFromCellToCell(curNode.i, curNode.j, map.get_goal().y, map.get_goal().x, options);
     curNode.F = hweight * curNode.H;
     curNode.parent = nullptr;
     addOpen(curNode);
@@ -41,20 +41,20 @@ SearchResult Astar::startSearch(ILogger *Logger, const Map &map, const Environme
     bool pathfound = false;
     while (!stopCriterion()) {
         curNode = findMin();
-        close.insert({curNode.i * map.width + curNode.j, curNode});
+        close.insert({curNode.i * map.get_width() + curNode.j, curNode});
         closeSize++;
         open[curNode.i].pop_front();
         openSize--;
-        if (curNode.i == map.goal.y && curNode.j == map.goal.x) {
+        if (curNode.i == map.get_goal().y && curNode.j == map.get_goal().x) {
             pathfound = true;
             break;
         }
         std::list<ANode> successors = findSuccessors(curNode, map, options);
         std::list<ANode>::iterator it = successors.begin();
-        auto parent = &(close.find(curNode.i * map.width + curNode.j)->second);
+        auto parent = &(close.find(curNode.i * map.get_width() + curNode.j)->second);
         while (it != successors.end()) {
             it->parent = parent;
-            it->H = computeHFromCellToCell(it->i, it->j, map.goal.y, map.goal.x, options);
+            it->H = computeHFromCellToCell(it->i, it->j, map.get_goal().y, map.get_goal().x, options);
             *it = resetParent(*it, *it->parent, map, options);
             it->F = it->g + hweight * it->H;
             addOpen(*it);
@@ -119,7 +119,7 @@ std::list<ANode> Astar::findSuccessors(ANode curNode, const Map &map, const Envi
                             continue;
                     }
                 }
-                if (close.find((curNode.i + i) * map.width + curNode.j + j) == close.end()) {
+                if (close.find((curNode.i + i) * map.get_width() + curNode.j + j) == close.end()) {
                     newNode.i = curNode.i + i;
                     newNode.j = curNode.j + j;
                     if(i == 0 || j == 0)

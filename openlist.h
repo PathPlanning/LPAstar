@@ -6,7 +6,7 @@
 #include <list>
 #include <vector>
 
-//representation of OPEN list as vector of lists, which provides both fast access to the element with minimum key value and fast search by the point value
+//representation of OPEN list as vector of lists, which provides both fast access to the element with minimum key value and fast search by the cell value
 class OpenList {
 public:
 
@@ -46,25 +46,25 @@ public:
     }
 
     inline void put (Node* item) { //add node to OPEN list or renew it's key value, is it is already there
-        if (elements[item->point.y].empty()) {
-            elements[item->point.y].emplace_back(item);
+        if (elements[item->cell.y].empty()) {
+            elements[item->cell.y].emplace_back(item);
             return;
         }
-        elements[item->point.y].remove_if([item](Node* curr) { return curr->point == item->point; });
-        std::list<Node*>::iterator it = elements[item->point.y].begin();
-        std::list<Node*>::iterator position = elements[item->point.y].end();
-        while (it != elements[item->point.y].end()) {
+        elements[item->cell.y].remove_if([item](Node* curr) { return curr->cell == item->cell; });
+        std::list<Node*>::iterator it = elements[item->cell.y].begin();
+        std::list<Node*>::iterator position = elements[item->cell.y].end();
+        while (it != elements[item->cell.y].end()) {
             if ((*it)->key < item->key) {
                 position = it;
             }
             ++it;
         }
-        if (++position != elements[item->point.y].end()) elements[item->point.y].emplace(position, item);
-        else elements[item->point.y].emplace_back(item);
+        if (++position != elements[item->cell.y].end()) elements[item->cell.y].emplace(position, item);
+        else elements[item->cell.y].emplace_back(item);
     }
 
     inline void remove_if(Node* item) {
-        elements[item->point.y].remove_if([item](Node* curr) { return curr->point == item->point; });
+        elements[item->cell.y].remove_if([item](Node* curr) { return curr->cell == item->cell; });
     }
 
     inline void resize(int value) {
@@ -85,7 +85,7 @@ public:
         for (auto elem : elements) {
             if (!elem.empty()) {
                 for(auto it = elem.begin(); it != elem.end(); ++it) {
-                    std::cout << (*it)->point << (*it)->key.k1 << " ";
+                    std::cout << (*it)->cell << (*it)->key.k1 << " ";
                 }
                 std::cout << std::endl;
             } else std::cout << "None\n";

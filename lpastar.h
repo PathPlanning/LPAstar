@@ -20,17 +20,13 @@ public:
     //main function for the whole pathbuilding algorithm
     LPASearchResult FindThePath(Map &map, EnvironmentOptions options);
 
-    //functions for path building
-    void MakePrimaryPath(Node* curNode);
-    void makeSecondaryPath();
-
 private:
     Node *start;
     Node *goal;
     int number_of_steps;
     double hweight;
 
-    EnvironmentOptions opt;
+    //EnvironmentOptions opt;
     std::list<Node> path;
     std::list<Node> hpath;
 
@@ -38,15 +34,19 @@ private:
     OpenList OPEN;
     std::unordered_map<int, Node> NODES;
 
-    void Initialize(Map &map);
-    void UpdateVertex(Node* u, Map &map);
-    bool ComputeShortestPath(Map &map);
-    double GetCost(Cell from, Cell to, Map &map) const;
-    Key CalculateKey(const Node &vertex, Map &map);
-    std::vector<Node *> GetSuccessors(Node *curr, Map &map);
-    std::list<Node *> GetSurroundings(Node *current, Map &map);
-    Node GetMinPredecessor(Node* curr, Map &map);
-    std::list<Node> FindNeighbors(Node* curr, Map &map) const;
+    void Initialize(Map &map, int metrics);
+    void UpdateVertex(Node* u, int metrics);
+    bool ComputeShortestPath(Map &map, EnvironmentOptions opt);
+    double GetCost(Cell from, Cell to) const;
+    Key CalculateKey(Node &vertex, int metrics);
+    std::vector<Node *> GetSuccessors(Node *curr, Map &map, EnvironmentOptions opt);
+    std::list<Node *> GetSurroundings(Node *current, Map &map, EnvironmentOptions opt);
+    Node GetMinPredecessor(Node* curr, Map &map, EnvironmentOptions opt);
+    std::list<Cell> FindNeighbors(Node* curr, Map &map, EnvironmentOptions opt) const;
+
+    //functions for path building
+    void MakePrimaryPath(Node* curNode);
+    void makeSecondaryPath();
 };
 
 #endif // LPASTAR_H

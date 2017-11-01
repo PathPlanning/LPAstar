@@ -98,15 +98,15 @@ void XmlLogger::writeToLogMap(const Map &map, const std::list<Node> &path, bool 
     int iterate = 0;
     bool inPath;
     std::string str;
-    for (int i = 0; i < map.height; ++i) {
+    for (int i = 0; i < map.get_height(); ++i) {
         XMLElement *element = doc.NewElement(CNS_TAG_ROW);
         element->SetAttribute(CNS_TAG_ATTR_NUM, iterate);
 
-        for (int j = 0; j < map.width; ++j) {
+        for (int j = 0; j < map.get_width(); ++j) {
             inPath = false;
             if(pathfound) {
                 for(std::list<Node>::const_iterator it = path.begin(); it != path.end(); it++)
-                    if(it->point.y == i && it->point.x == j) {
+                    if(it->cell.y == i && it->cell.x == j) {
                         inPath = true;
                         break;
                     }
@@ -224,8 +224,8 @@ void XmlLogger::writeToLogPath(const std::list<Node> &path)
 
     for (std::list<Node>::const_iterator it = path.begin(); it != path.end(); it++) {
         XMLElement *element = doc.NewElement(CNS_TAG_POINT);
-        element->SetAttribute(CNS_TAG_ATTR_X, it->point.x);
-        element->SetAttribute(CNS_TAG_ATTR_Y, it->point.y);
+        element->SetAttribute(CNS_TAG_ATTR_X, it->cell.x);
+        element->SetAttribute(CNS_TAG_ATTR_Y, it->cell.y);
         element->SetAttribute(CNS_TAG_ATTR_NUM, iterate);
         lplevel->InsertEndChild(element);
         iterate++;
@@ -245,11 +245,11 @@ void XmlLogger::writeToLogHPpath(const std::list<Node> &hppath)
     while (iter != --hppath.end()) {
         XMLElement *part = doc.NewElement(CNS_TAG_SECTION);
         part->SetAttribute(CNS_TAG_ATTR_NUM, partnumber);
-        part->SetAttribute(CNS_TAG_ATTR_STX, it->point.x);
-        part->SetAttribute(CNS_TAG_ATTR_STY, it->point.y);
+        part->SetAttribute(CNS_TAG_ATTR_STX, it->cell.x);
+        part->SetAttribute(CNS_TAG_ATTR_STY, it->cell.y);
         ++iter;
-        part->SetAttribute(CNS_TAG_ATTR_FINX, iter->point.x);
-        part->SetAttribute(CNS_TAG_ATTR_FINY, iter->point.y);
+        part->SetAttribute(CNS_TAG_ATTR_FINX, iter->cell.x);
+        part->SetAttribute(CNS_TAG_ATTR_FINY, iter->cell.y);
         part->SetAttribute(CNS_TAG_ATTR_LENGTH, iter->g - it->g);
         hplevel->LinkEndChild(part);
         ++it;

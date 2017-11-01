@@ -2,6 +2,13 @@
 #define SEARCHRESULT_H
 #include <list>
 #include "node.h"
+
+struct Changes {
+    std::list<Cell> occupied;
+    std::list<Cell> cleared;
+};
+
+
 struct SearchResult
 {
         bool pathfound;
@@ -27,6 +34,7 @@ struct SearchResult
 struct LPASearchResult
 {
         bool pathfound;
+        bool goal_became_unreachable;
         float pathlength; //if path not found, then pathlength=0
         const std::list<Node>* lppath;
         const std::list<Node>* hppath;

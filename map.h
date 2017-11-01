@@ -5,7 +5,7 @@
 #include "environmentoptions.h"
 #include "gl_const.h"
 #include <list>
-#include "structures.h"
+#include "searchresult.h"
 #include "tinyxml2.h"
 #include <sstream>
 #include <string>
@@ -26,22 +26,17 @@ class Map
         bool CellIsTraversable (Cell curr) const;
         bool CellOnGrid (Cell curr) const;
         bool CellIsObstacle(Cell cur) const;
-        bool CellIsNeighbor(Cell next, Cell curr) const;
-
-        bool Cut(Cell next, Cell current) const;
-        bool Squeeze(Cell next, Cell current) const;
 
         int * operator [] (int i);
         const int * operator [] (int i) const;
 
         void PrintPath(std::list<Node> path);
 
-        int     height, width;
-        Cell    start;
-        Cell    goal;
-        EnvironmentOptions algorithm_info;
-        double  CellSize;
-
+        const int get_height() const;
+        const int get_width() const;
+        Cell get_start() const;
+        Cell get_goal() const;
+        double get_cellsize() const;
 
     private:
 
@@ -49,6 +44,10 @@ class Map
 
         void BuildGrid();
         Cell damaged;
+        int     height, width;
+        Cell    start;
+        Cell    goal;
+        double  CellSize;
 
         std::string filename;
 
