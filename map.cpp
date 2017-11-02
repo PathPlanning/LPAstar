@@ -74,10 +74,10 @@ Changes Map::DamageTheMap(std::list<Node> path)
     Changes result;
     std::random_device rd;
     std::mt19937 rng(rd());
-    std::uniform_int_distribution<int> uni(3, path.size() - 3);
+    std::uniform_int_distribution<int> uni(4, path.size() - 4);
 
-    //auto random_number = uni(rng); //create random number to damage random part of the path
-    int random_number = 3;
+    auto random_number = uni(rng); //create random number to damage random part of the path
+    //int random_number = 3;
     int i = 0;
     Node crash = path.front();
     auto it = path.begin();

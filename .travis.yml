@@ -14,14 +14,6 @@ matrix:
           - gcc-4.9
     env:
      - MATRIX_EVAL="CC=gcc-4.9"
- 
-  - os: osx
-    compiler: clang
-    env:
-     - MATRIX_EVAL="CC=clang"
-
-install:
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then brew update; fi
   
 script:
   - mkdir build
