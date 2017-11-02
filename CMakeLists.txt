@@ -26,7 +26,6 @@ set(HEADER_FILES
 	mission.h
 	openlist.h
         searchresult.h
-	structures.h
         tinyxml2.h
         xmllogger.h)
 add_executable(LPAstar ${SOURCE_FILES} ${HEADER_FILES})
