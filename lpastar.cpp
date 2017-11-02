@@ -231,6 +231,7 @@ Node LPAstar::GetMinPredecessor(Node* current, Map &map, EnvironmentOptions opt)
     Node* neighbor; //neighbour of current node, we will be looking for neighbour with minimal cost from it to current
     if (!all_neighbors.empty()) {
         neighbor = all_neighbors.front();
+        dummy_current = *neighbor;
         dummy_current.rhs = std::numeric_limits<double>::infinity(); //setting parameters for "dummy"
         dummy_current.parent = neighbor; //setting parameters for "dummy"
         for (auto n: all_neighbors) {
@@ -259,7 +260,6 @@ std::vector<Node* > LPAstar::GetSuccessors(Node* current, Map &map, EnvironmentO
 
 //function returns list of map neighbors to the current node depending on the environmental conditions
 std::list<Cell> LPAstar::FindNeighbors(Node* n, Map &map, EnvironmentOptions opt) const {
-    Cell new_cell;
     Cell curNode = n->cell;
     std::list<Cell> successors;
     for (int i = -1; i <= +1; i++) {
@@ -280,8 +280,7 @@ std::list<Cell> LPAstar::FindNeighbors(Node* n, Map &map, EnvironmentOptions opt
                             continue;
                     }
                 }
-                new_cell = Cell(curNode.x + j, curNode.y + i);
-                successors.push_front(new_cell);
+                successors.push_front(Cell(curNode.x + j, curNode.y + i));
             }
         }
     }
